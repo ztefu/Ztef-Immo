@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #f4f7fe; /* Light grayish blue from Databrain */
+    --foreground: #1e293b; /* Slate 800 */
+
+    --card: #ffffff;
+    --card-foreground: #1e293b;
+
+    --popover: #ffffff;
+    --popover-foreground: #1e293b;
+
+    --primary: 160 84% 39%; /* Teal/Mint green e.g. #10b981 */
+    --primary-foreground: #ffffff;
+
+    --secondary: #f1f5f9;
+    --secondary-foreground: #0f172a;
+
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+
+    --accent: #f1f5f9;
+    --accent-foreground: #0f172a;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: #ffffff;
+
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: 160 84% 39%;
+
+    --radius: 1rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  @keyframes highlightFade {
+    0% { background-color: #dcfce7; }
+    10% { background-color: #dcfce7; }
+    100% { background-color: #ffffff; }
+  }
+  .animate-highlight {
+    animation: highlightFade 10s ease-out forwards;
+  }
+}
