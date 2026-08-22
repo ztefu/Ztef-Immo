@@ -186,7 +186,7 @@ function SettingsContent() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-24 sm:pb-0">
       <PageHeader
         title="Paramètres"
         description={isOwner ? "Gérez vos préférences et vos configurations." : "Gérez les préférences de votre agence et les configurations globales."}
