@@ -351,7 +351,7 @@ export default function DashboardPage() {
 
           <div className="flex justify-between items-start z-10">
             <div className="pr-16">
-              <p className="text-[32px] font-bold text-slate-900 leading-none">{dynamicStats.logements}</p>
+              <p className="text-2xl sm:text-[32px] font-bold text-slate-900 leading-none truncate">{dynamicStats.logements}</p>
               <p className="text-xs font-medium text-slate-500 mt-2">Logements gérés</p>
             </div>
           </div>
@@ -377,7 +377,7 @@ export default function DashboardPage() {
 
           <div className="flex justify-between items-start z-10">
             <div className="pr-16">
-              <p className="text-[32px] font-bold text-slate-900 leading-none">{dynamicStats.encaisses}</p>
+              <p className="text-2xl sm:text-[32px] font-bold text-slate-900 leading-none truncate">{dynamicStats.encaisses}</p>
               <p className="text-xs font-medium text-slate-500 mt-2">Loyers encaissés (FCFA)</p>
             </div>
           </div>
@@ -414,7 +414,7 @@ export default function DashboardPage() {
 
           <div className="flex justify-between items-start z-10">
             <div className="pr-16">
-              <p className="text-[32px] font-bold text-slate-900 leading-none">{dynamicStats.attente}</p>
+              <p className="text-2xl sm:text-[32px] font-bold text-slate-900 leading-none truncate">{dynamicStats.attente}</p>
               <p className="text-xs font-medium text-slate-500 mt-2">En attente (FCFA)</p>
             </div>
           </div>
@@ -449,7 +449,7 @@ export default function DashboardPage() {
 
           <div className="flex justify-between items-start z-10">
             <div className="pr-16">
-              <p className="text-[32px] font-bold text-slate-900 leading-none">{dynamicStats.occupes}</p>
+              <p className="text-2xl sm:text-[32px] font-bold text-slate-900 leading-none truncate">{dynamicStats.occupes}</p>
               <p className="text-xs font-medium text-slate-500 mt-2">Logements occupés</p>
             </div>
           </div>
@@ -714,7 +714,7 @@ export default function DashboardPage() {
             <Info className="h-4 w-4 text-slate-400 cursor-help" />
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative">
+            <div className="hidden sm:block relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="text"

@@ -199,7 +199,7 @@ export default function MaintenancePage() {
         actions={
           <button 
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 bg-white border border-slate-400 text-slate-900  px-5 py-2.5 rounded-full hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors text-sm font-semibold shadow-sm w-full sm:w-auto justify-center"
+            className="flex items-center gap-2 bg-transparent border border-slate-400 text-slate-900 px-5 py-2.5 rounded-full hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors text-sm font-semibold shadow-sm w-full sm:w-auto justify-center"
           >
             <Plus className="w-4 h-4" />
             Nouveau Ticket
@@ -221,12 +221,12 @@ export default function MaintenancePage() {
               className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-full focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm font-medium text-slate-900 placeholder:text-slate-400"
             />
           </div>
-          <div className="flex overflow-x-auto gap-2 pb-2 sm:pb-0 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex w-full justify-between gap-1 sm:gap-2 pb-2 sm:pb-0">
             {["Tous", "Nouveau", "En cours", "Résolu"].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
-                className={`flex-shrink-0 px-4 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                className={`flex-1 sm:flex-none px-1 sm:px-4 py-2 sm:py-2.5 rounded-full text-[11px] sm:text-sm font-semibold transition-all truncate ${
                   filterStatus === status 
                     ? "bg-white border border-slate-400 text-slate-900 hover:bg-slate-900 hover:text-white hover:border-slate-900 shadow-md" 
                     : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"

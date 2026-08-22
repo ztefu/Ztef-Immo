@@ -144,12 +144,12 @@ export default function OwnersPage() {
       accessorKey: "fullName" as const,
       cell: (item: any) => (
         <div className="flex items-center">
-          <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold mr-3">
+          <div className="h-10 w-10 rounded-full bg-slate-100 hidden sm:flex items-center justify-center text-slate-600 font-bold mr-3 shrink-0">
             {item.fullName ? item.fullName.charAt(0) : '?'}
           </div>
-          <div>
-            <div className="font-bold text-slate-900">{item.fullName}</div>
-            <div className="text-sm text-slate-500">{item.email}</div>
+          <div className="min-w-0 flex-1">
+            <div className="font-bold text-slate-900 whitespace-normal break-words leading-tight">{item.fullName}</div>
+            <div className="text-sm text-slate-500 truncate mt-0.5">{item.email}</div>
           </div>
         </div>
       ),

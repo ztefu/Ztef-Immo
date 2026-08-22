@@ -28,7 +28,7 @@ export function AppHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   };
 
   return (
-    <div className="sticky top-0 z-40 flex shrink-0 items-center gap-x-2 sm:gap-x-6 bg-transparent px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+    <div className="sticky top-0 z-40 flex shrink-0 items-center gap-x-2 sm:gap-x-6 bg-slate-50/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 pt-4 pb-2">
       <button 
         type="button" 
         className="-m-2.5 p-2.5 text-slate-700 lg:hidden hover:bg-slate-100 rounded-full transition-colors mr-2"
@@ -48,7 +48,7 @@ export function AppHeader({ onMenuClick }: { onMenuClick?: () => void }) {
               </div>
             ) : (
               <>
-                <span className="text-[15px] sm:text-sm font-bold text-slate-900">
+                <span className="text-[15px] sm:text-sm font-bold text-slate-900 truncate max-w-[150px] sm:max-w-none whitespace-nowrap">
                   👋 Salut, {userName.split(' ')[0]}
                 </span>
                 <span className="hidden sm:inline sm:text-xs font-medium text-slate-500 sm:ml-1">

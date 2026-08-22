@@ -183,11 +183,11 @@ export default function TenantsPage() {
       header: "Locataire",
       cell: (item: any) => (
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm">
+          <div className="h-10 w-10 rounded-full bg-slate-100 hidden sm:flex items-center justify-center text-slate-600 font-bold text-sm">
             {item.fullName.charAt(0)}
           </div>
           <div>
-            <div className="font-bold text-slate-900">{item.fullName}</div>
+            <div className="font-bold text-slate-900 whitespace-normal break-words leading-tight">{item.fullName}</div>
             <div className="text-xs text-slate-500">{item.email}</div>
           </div>
         </div>

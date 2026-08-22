@@ -314,27 +314,17 @@ export default function RentPage() {
         title="Loyers & Paiements" 
         description="Suivi des encaissements et génération des quittances"
         actions={
-          <>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Chercher un locataire..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 pl-10 pr-4 rounded-full bg-white border-0 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] text-sm focus:ring-2 focus:ring-primary/20 outline-none w-full sm:w-64 transition-all"
-              />
-            </div>
+          <div className="hidden sm:block">
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsModalOpen(true)}
-              className="flex h-11 items-center justify-center rounded-full bg-white border border-slate-400 text-slate-900 px-5 text-sm font-medium  shadow-md hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors whitespace-nowrap"
+              className="flex h-11 items-center justify-center rounded-full bg-transparent border border-slate-400 text-slate-900 px-5 text-sm font-medium shadow-sm hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors whitespace-nowrap"
             >
               <Plus className="mr-2 h-4 w-4" />
               Enregistrer un paiement
             </motion.button>
-          </>
+          </div>
         }
       />
 
@@ -388,6 +378,19 @@ export default function RentPage() {
           </motion.div>
         )}
       </div>
+      {/* Mobile only add button (below stats) */}
+      <div className="sm:hidden block w-full mt-2">
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsModalOpen(true)}
+          className="flex w-full h-11 items-center justify-center rounded-full bg-transparent border border-slate-400 text-slate-900 px-5 text-sm font-medium shadow-sm hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors whitespace-nowrap"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Enregistrer un paiement
+        </motion.button>
+      </div>
+
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
@@ -395,7 +398,19 @@ export default function RentPage() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="bg-white rounded-[32px] p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-100"
       >
-        <h3 className="text-xl font-bold text-slate-900 mb-6">Historique des transactions</h3>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h3 className="text-xl font-bold text-slate-900">Historique des transactions</h3>
+          <div className="relative w-full sm:w-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Chercher un locataire..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-11 pl-10 pr-4 rounded-full bg-slate-50 border border-slate-200 text-sm focus:ring-2 focus:ring-primary/20 outline-none w-full sm:w-64 transition-all"
+            />
+          </div>
+        </div>
         <DataTable data={enrichedPayments.map(p => ({ ...p, isNew: p.id === highlightedId }))} columns={columns} emptyMessage="Aucun paiement trouvé." />
       </motion.div>
 

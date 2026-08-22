@@ -150,7 +150,7 @@ export function AppSidebar({
         {/* Floating Collapse Button */}
         <button 
           onClick={toggleSidebar} 
-          className="absolute -right-3 top-9 hidden lg:flex h-6 w-6 items-center justify-center rounded-full bg-white border border-primary/40 text-primary shadow-md hover:bg-primary hover:text-white hover:border-primary transition-transform hover:scale-110 z-20"
+          className="absolute -right-3 top-9 hidden lg:flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white border border-primary shadow-md hover:bg-white hover:text-primary hover:border-primary/40 transition-transform hover:scale-110 z-20"
         >
           <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", !isExpanded && "rotate-180")} />
         </button>
@@ -250,7 +250,7 @@ export function AppSidebar({
           
           {/* Footer Text */}
           {!isLoadingAgency && !isOwner && (
-            <div className={cn("mt-auto pt-4 pb-2 text-center shrink-0 transition-opacity duration-300 flex flex-col items-center", 
+            <div className={cn("mt-auto pt-4 pb-24 lg:pb-2 text-center shrink-0 transition-opacity duration-300 flex flex-col items-center", 
               !isExpanded && "lg:opacity-0 lg:pointer-events-none"
             )}>
               <div className="relative w-full h-[20px] shrink-0 mb-3">
