@@ -543,7 +543,7 @@ export default function DashboardPage() {
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-1.5">
-                <h2 className="text-[17px] font-bold text-slate-900">Génération de revenus</h2>
+                <h2 className="text-sm sm:text-[17px] font-bold text-slate-900 whitespace-nowrap overflow-hidden text-ellipsis">Génération de revenus</h2>
                 <Info className="h-4 w-4 text-slate-400 cursor-help" />
               </div>
               <div className="hidden sm:flex items-center gap-4 text-xs">
@@ -636,7 +636,7 @@ export default function DashboardPage() {
               <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
                 <Trees className="h-4 w-4" />
               </div>
-              <h3 className="font-bold text-slate-900 text-lg">Tickets de Maintenance</h3>
+              <h3 className="font-bold text-slate-900 text-sm sm:text-lg whitespace-nowrap overflow-hidden text-ellipsis">Tickets de Maintenance</h3>
             </div>
             <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">{recentTickets.length} {recentTickets.length > 1 ? 'actifs' : 'actif'}</span>
           </div>
@@ -668,7 +668,7 @@ export default function DashboardPage() {
               <div className="p-2 bg-red-100 text-red-600 rounded-lg">
                 <AlertTriangle className="h-4 w-4" />
               </div>
-              <h3 className="font-bold text-slate-900 text-lg">Top Impayés / Retards</h3>
+              <h3 className="font-bold text-slate-900 text-sm sm:text-lg whitespace-nowrap overflow-hidden text-ellipsis">Top Impayés / Retards</h3>
             </div>
             <span className="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full">{lateTenants.length} {lateTenants.length > 1 ? 'alertes' : 'alerte'}</span>
           </div>

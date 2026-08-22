@@ -38,9 +38,9 @@ export function AppHeader({ onMenuClick }: { onMenuClick?: () => void }) {
         <Menu className="h-6 w-6" aria-hidden="true" />
       </button>
 
-      <div className="flex flex-1 items-center justify-between bg-white rounded-[24px] p-2 sm:p-3 sm:px-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-100 transition-all duration-300">
-        <div className="flex flex-1 items-center gap-x-4">
-          <div className="flex flex-col pl-2">
+      <div className="flex flex-1 items-center justify-between bg-white rounded-[24px] p-2 sm:p-3 sm:px-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-100 transition-all duration-300 min-w-0">
+        <div className="flex flex-1 items-center gap-x-4 min-w-0">
+          <div className="flex flex-col pl-2 min-w-0">
             {isLoading ? (
               <div className="animate-pulse flex flex-col gap-1.5 py-1">
                 <div className="h-4 bg-slate-200 rounded w-24"></div>
@@ -59,7 +59,7 @@ export function AppHeader({ onMenuClick }: { onMenuClick?: () => void }) {
           </div>
         </div>
         
-        <div className="flex items-center gap-x-2 sm:gap-x-4">
+        <div className="flex items-center gap-x-2 sm:gap-x-4 shrink-0">
           <button type="button" className="relative flex items-center justify-center h-10 w-10 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
             <span className="sr-only">Voir les notifications</span>
             <Bell className="h-5 w-5" aria-hidden="true" />

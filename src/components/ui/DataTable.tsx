@@ -62,7 +62,7 @@ export function DataTable<T>({ data, columns, onRowClick, emptyMessage = "Aucune
                       {col.header}
                     </span>
                   )}
-                  <div className="text-sm text-slate-900 font-medium text-right break-words truncate max-w-[60%]">
+                  <div className="text-sm text-slate-900 font-medium text-right break-words max-w-[70%]">
                     {cellContent}
                   </div>
                 </div>

@@ -86,7 +86,7 @@ export function AppSidebar({
             }
           }}
           className={cn(
-            "relative group flex items-center py-3 text-sm font-semibold rounded-2xl transition-all duration-200",
+            "relative group flex items-center py-2 sm:py-3 text-sm font-semibold rounded-2xl transition-all duration-200",
             isExpanded ? "px-4" : "justify-center px-2",
             isActive
               ? "bg-primary border border-primary text-white shadow-md shadow-primary/20 hover:bg-white hover:text-primary hover:border-primary/40"
@@ -156,11 +156,11 @@ export function AppSidebar({
         </button>
 
         <div className={cn(
-          "flex grow flex-col gap-y-7 overflow-y-auto pb-4",
+          "flex grow flex-col gap-y-4 sm:gap-y-7 overflow-y-auto pb-4",
           isExpanded ? "px-5" : "px-3 items-center"
         )}>
           {/* Logo Area */}
-          <div className={cn("flex h-24 shrink-0 items-center", isExpanded ? "justify-start pl-2" : "justify-center")}>
+          <div className={cn("flex h-16 sm:h-24 shrink-0 items-center", isExpanded ? "justify-start pl-2" : "justify-center")}>
             <Link href="/dashboard" className="flex items-center gap-3" title={!isExpanded ? APP_NAME : undefined}>
               <div className="flex-shrink-0 flex items-center justify-center -ml-2">
                 <Image src="/logo.png" alt="Logo" width={36} height={36} className="object-contain drop-shadow-md" />
@@ -183,7 +183,7 @@ export function AppSidebar({
             </Link>
           </div>
 
-          <div className="relative w-full h-[30px] shrink-0 mb-4 -mt-3">
+          <div className="relative w-full h-[20px] sm:h-[30px] shrink-0 mb-2 sm:mb-4 -mt-2 sm:-mt-3">
             <svg 
               className="w-full h-full" 
               viewBox="0 0 100 30" 
@@ -237,7 +237,7 @@ export function AppSidebar({
           
           {/* Nav Links */}
           <nav className="flex flex-1 flex-col w-full">
-            <ul role="list" className="flex flex-1 flex-col gap-y-2 w-full">
+            <ul role="list" className="flex flex-1 flex-col gap-y-1 sm:gap-y-2 w-full">
               {isLoadingAgency ? (
                 <div className="animate-pulse flex flex-col gap-2 w-full mt-2">
                   {[1, 2, 3, 4, 5, 6].map((i) => (
