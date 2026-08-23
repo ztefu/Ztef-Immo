@@ -39,7 +39,7 @@ export function DataTable<T>({ data, columns, onRowClick, emptyMessage = "Aucune
   }
 
   return (
-    <div className="bg-white rounded-[24px] shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-100 overflow-hidden">
+    <div className="bg-white rounded-[24px] shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-100 overflow-visible">
       
       {/* Vue Mobile (Cartes) */}
       <div className="md:hidden flex flex-col p-3 gap-3 bg-slate-50/30">
@@ -73,7 +73,7 @@ export function DataTable<T>({ data, columns, onRowClick, emptyMessage = "Aucune
       </div>
 
       {/* Vue Desktop (Tableau standard) */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden md:block overflow-visible">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/50">

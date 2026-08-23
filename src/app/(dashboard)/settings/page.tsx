@@ -62,6 +62,7 @@ function SettingsContent() {
       contactEmail: formData.get("email") as string,
       contactPhone: formData.get("phone") as string,
       address: formData.get("address") as string,
+      tenantAccessCode: formData.get("tenantAccessCode") as string,
     };
     
     try {
@@ -72,6 +73,7 @@ function SettingsContent() {
           email: updates.contactEmail,
           phone: updates.contactPhone,
           address: updates.address,
+          tenantAccessCode: updates.tenantAccessCode,
         };
         const updatedOwner = await updateOwner(currentAgency.id, ownerUpdates);
         updated = {
@@ -186,7 +188,7 @@ function SettingsContent() {
   };
 
   return (
-    <div className="w-full pb-24 sm:pb-0">
+    <div className="w-full pb-32 sm:pb-0">
       <PageHeader
         title="Paramètres"
         description={isOwner ? "Gérez vos préférences et vos configurations." : "Gérez les préférences de votre agence et les configurations globales."}
@@ -283,6 +285,21 @@ function SettingsContent() {
                       defaultValue={currentAgency?.address || ""}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-[20px] focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm font-medium text-slate-900 resize-none"
                     />
+                  </div>
+
+                  <div className="col-span-1 md:col-span-2 mt-2 pt-6 border-t border-slate-100">
+                    <h3 className="text-[17px] font-bold text-slate-900 mb-4">Accès Locataires</h3>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Code d'accès par défaut (Portail Locataire)</label>
+                      <input 
+                        name="tenantAccessCode"
+                        type="text" 
+                        defaultValue={currentAgency?.tenantAccessCode || "Locat@12345"}
+                        placeholder="Ex: MonAgence2026"
+                        className="w-full md:w-1/2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-full focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm font-medium text-slate-900"
+                      />
+                      <p className="text-xs text-slate-500 mt-2">Ce code de connexion sera attribué à tous vos nouveaux locataires.</p>
+                    </div>
                   </div>
                 </form>
                 )}

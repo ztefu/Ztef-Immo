@@ -13,6 +13,7 @@ export interface Agency {
   contactEmail?: string;
   contactPhone?: string;
   address?: string;
+  tenantAccessCode?: string;
 }
 
 export interface Owner {
@@ -28,6 +29,7 @@ export interface Owner {
   authId?: string;
   slug?: string;
   logoUrl?: string;
+  tenantAccessCode?: string;
 }
 
 export interface Property {

@@ -14,7 +14,11 @@ export function AppHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   const { agencyName, userName, isLoading, isOwner } = useAgency();
   const { count: newTicketsCount, isLoadingCount } = useNewTicketsCount();
   const pathname = usePathname();
-  const isSettingsActive = pathname.startsWith("/settings");
+  const isAdmin = pathname.startsWith("/admin");
+  const isSettingsActive = pathname.startsWith("/settings") || pathname.startsWith("/admin/settings");
+
+  const settingsHref = isAdmin ? "/admin/settings" : "/settings?tab=agence";
+  const profileHref = isAdmin ? "/admin/settings" : "/settings?tab=compte";
 
   const handleLogout = async () => {
     try {
@@ -73,11 +77,11 @@ export function AppHeader({ onMenuClick }: { onMenuClick?: () => void }) {
           </button>
           
           <Link 
-            href="/settings?tab=agence" 
+            href={settingsHref} 
             className={cn(
               "relative flex items-center justify-center h-10 w-10 rounded-full transition-colors",
               isSettingsActive 
-                ? "bg-primary border border-primary text-white shadow-md shadow-primary/20 hover:bg-white hover:text-primary hover:border-primary/40" 
+                ? (isAdmin ? "bg-slate-900 border border-slate-900 text-white shadow-md shadow-slate-900/20 hover:bg-white hover:text-slate-900 hover:border-slate-900/40" : "bg-primary border border-primary text-white shadow-md shadow-primary/20 hover:bg-white hover:text-primary hover:border-primary/40")
                 : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
             )}
           >
@@ -119,9 +123,9 @@ export function AppHeader({ onMenuClick }: { onMenuClick?: () => void }) {
                     <p className="text-xs text-slate-500 truncate">{agencyName}</p>
                   </div>
                   <Link 
-                    href="/settings?tab=compte"
+                    href={profileHref}
                     onClick={() => setIsProfileOpen(false)}
-                    className="flex w-full items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors"
+                    className={`flex w-full items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors ${isAdmin ? "hover:text-slate-900 font-medium" : "hover:text-primary"}`}
                   >
                     <User className="mr-3 h-4 w-4 text-slate-400" />
                     Profil

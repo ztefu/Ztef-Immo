@@ -61,7 +61,23 @@ export async function updateSession(request: NextRequest) {
   // Les locataires se connectent via /portal (qui utilise @locataire.ztefu.com)
   if (user) {
     const isTenantUser = user.email?.endsWith('@locataire.ztefu.com');
+    const isSuperAdmin = user.email === 'admin@ztefu-immo.com';
+    const isAdminPath = request.nextUrl.pathname.startsWith('/admin');
     
+    // Sécurité : Seul le super admin peut accéder à /admin
+    if (isAdminPath && !isSuperAdmin) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
+
+    // Si c'est le super admin et qu'il va sur le dashboard classique, on le force vers /admin
+    if (isSuperAdmin && !isAdminPath && !request.nextUrl.pathname.startsWith('/api') && !isAuthPath) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/admin'
+      return NextResponse.redirect(url)
+    }
+
     // Si c'est un locataire qui essaie d'aller sur l'interface agence
     if (isTenantUser && !request.nextUrl.pathname.startsWith('/portal') && !request.nextUrl.pathname.startsWith('/api')) {
       const url = request.nextUrl.clone()
@@ -69,8 +85,8 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
     
-    // Si c'est un admin qui essaie d'aller sur le portail locataire protégé (on le redirige sur le dashboard agence)
-    if (!isTenantUser && request.nextUrl.pathname.startsWith('/portal/dashboard')) {
+    // Si c'est une agence qui essaie d'aller sur le portail locataire protégé (on le redirige sur le dashboard agence)
+    if (!isTenantUser && !isSuperAdmin && request.nextUrl.pathname.startsWith('/portal/dashboard')) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       return NextResponse.redirect(url)
@@ -79,7 +95,7 @@ export async function updateSession(request: NextRequest) {
     // Si l'utilisateur est connecté et essaie d'accéder à la page de login, on le redirige
     if (isAuthPath) {
       const url = request.nextUrl.clone()
-      url.pathname = isTenantUser ? '/portal/dashboard' : '/dashboard'
+      url.pathname = isSuperAdmin ? '/admin' : (isTenantUser ? '/portal/dashboard' : '/dashboard')
       return NextResponse.redirect(url)
     }
   }

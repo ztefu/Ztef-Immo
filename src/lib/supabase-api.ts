@@ -14,7 +14,8 @@ function mapAgency(db: any): Agency {
     logoUrl: db.logo_url,
     contactEmail: db.contact_email,
     contactPhone: db.contact_phone,
-    address: db.address
+    address: db.address,
+    tenantAccessCode: db.tenant_access_code
   };
 }
 import { unstable_noStore as noStore } from 'next/cache';
@@ -45,7 +46,7 @@ export async function getCurrentAgency(providedUserId?: string) {
 
   // 3. If not an agency manager, check if user is an autonomous owner
   if (!agencyId) {
-    const { data: owner } = await adminClient.from('owners').select('id, full_name, email, phone, address, slug, management_type').eq('auth_id', userId).single();
+    const { data: owner } = await adminClient.from('owners').select('id, full_name, email, phone, address, slug, management_type, tenant_access_code').eq('auth_id', userId).single();
     if (owner && owner.management_type === 'Autonome') {
       // Return a "virtual agency" object representing the autonomous owner's context
       return {
@@ -56,6 +57,7 @@ export async function getCurrentAgency(providedUserId?: string) {
         contactEmail: owner.email,
         contactPhone: owner.phone,
         address: owner.address,
+        tenantAccessCode: owner.tenant_access_code,
         _isOwner: true, // Internal flag to distinguish from real agencies
       } as Agency & { _isOwner?: boolean };
     }
@@ -135,10 +137,23 @@ export async function updateAgency(id: string, updates: any) {
   if (updates.address) dbUpdates.address = updates.address;
   if (updates.themeColor) dbUpdates.theme_color = updates.themeColor;
   if (updates.language) dbUpdates.language = updates.language;
+  if (updates.tenantAccessCode !== undefined) dbUpdates.tenant_access_code = updates.tenantAccessCode;
 
   const { data, error } = await adminClient.from('agencies').update(dbUpdates).eq('id', id).select().single();
   if (error) throw error;
   
+  if (updates.tenantAccessCode !== undefined) {
+    const { data: tenants } = await adminClient.from('tenants').select('auth_id').eq('agency_id', id).not('auth_id', 'is', null);
+    if (tenants && tenants.length > 0) {
+      for (const t of tenants) {
+        if (t.auth_id) {
+          const { error: authError } = await adminClient.auth.admin.updateUserById(t.auth_id, { password: updates.tenantAccessCode });
+          if (authError) console.error("Erreur mise à jour mot de passe locataire (Agence):", authError);
+        }
+      }
+    }
+  }
+
   revalidatePath('/', 'layout');
   return mapAgency(data);
 }
@@ -369,6 +384,7 @@ function mapOwner(db: any): Owner {
     authId: db.auth_id,
     slug: db.slug,
     logoUrl: db.logo_url,
+    tenantAccessCode: db.tenant_access_code,
   };
 }
 
@@ -740,12 +756,21 @@ export async function addTenant(tenant: any) {
   const agencyId = context.type === 'agency' ? context.agencyId : null;
   const scopeId = context.type === 'agency' ? context.agencyId : context.ownerId;
   
+  let accessCode = 'Locat@12345';
+  if (context.type === 'agency') {
+    const { data: agency } = await adminClient.from('agencies').select('tenant_access_code').eq('id', context.agencyId).single();
+    if (agency?.tenant_access_code) accessCode = agency.tenant_access_code;
+  } else {
+    const { data: owner } = await adminClient.from('owners').select('tenant_access_code').eq('id', context.ownerId).single();
+    if (owner?.tenant_access_code) accessCode = owner.tenant_access_code;
+  }
+  
   const cleanPhone = tenant.phone.replace(/\s+/g, '');
   const pseudoEmail = `${cleanPhone}.${scopeId}@locataire.ztefu.com`;
 
   const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
     email: pseudoEmail,
-    password: 'Locat@12345',
+    password: accessCode,
     email_confirm: true
   });
 
@@ -964,7 +989,7 @@ export async function addOwner(owner: any) {
 }
 
 export async function updateOwner(id: string, updates: any) {
-  const supabase = createClient();
+  const adminClient = createAdminClient();
   const dbUpdates: any = {};
   if (updates.fullName) dbUpdates.full_name = updates.fullName;
   if (updates.phone) dbUpdates.phone = updates.phone;
@@ -973,9 +998,31 @@ export async function updateOwner(id: string, updates: any) {
   if (updates.managementType) dbUpdates.management_type = updates.managementType;
   if (updates.commissionRate) dbUpdates.commission_rate = updates.commissionRate;
   if (updates.joinDate) dbUpdates.join_date = updates.joinDate;
+  if (updates.tenantAccessCode !== undefined) dbUpdates.tenant_access_code = updates.tenantAccessCode;
 
-  const { data, error } = await supabase.from('owners').update(dbUpdates).eq('id', id).select().single();
+  const { data, error } = await adminClient.from('owners').update(dbUpdates).eq('id', id).select().single();
   if (error) throw error;
+
+  if (updates.tenantAccessCode !== undefined) {
+    const { data: properties } = await adminClient.from('properties').select('id').eq('owner_id', id);
+    const propertyIds = properties?.map(p => p.id) || [];
+    if (propertyIds.length > 0) {
+      const { data: units } = await adminClient.from('units').select('id').in('property_id', propertyIds);
+      const unitIds = units?.map(u => u.id) || [];
+      if (unitIds.length > 0) {
+        const { data: tenants } = await adminClient.from('tenants').select('auth_id').in('unit_id', unitIds).not('auth_id', 'is', null);
+        if (tenants && tenants.length > 0) {
+          for (const t of tenants) {
+            if (t.auth_id) {
+              const { error: authError } = await adminClient.auth.admin.updateUserById(t.auth_id, { password: updates.tenantAccessCode });
+              if (authError) console.error("Erreur mise à jour mot de passe locataire (Propriétaire):", authError);
+            }
+          }
+        }
+      }
+    }
+  }
+
   return mapOwner(data);
 }
 
