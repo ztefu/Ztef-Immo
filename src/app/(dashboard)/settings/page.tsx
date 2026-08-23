@@ -2,7 +2,7 @@
 
 import { PageHeader } from "@/components/ui/PageHeader";
 import { motion } from "framer-motion";
-import { Save, Bell, Shield, User, Building, Eye, EyeOff } from "lucide-react";
+import { Save, Bell, Shield, User, Building, Eye, EyeOff, MessageCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -187,6 +187,18 @@ function SettingsContent() {
     }
   };
 
+  const shareOnWhatsApp = () => {
+    if (agencySlug) {
+      const link = `${window.location.origin}/portal?${portalParam}`;
+      const code = currentAgency?.tenantAccessCode || "Locat@12345";
+      const message = `Bonjour ! Voici le lien sécurisé pour accéder à votre espace locataire :\n\n${link}\n\nVotre code de connexion par défaut est : ${code}\n\nÀ très vite !`;
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    } else {
+      toast.error("Veuillez vous authentifier pour générer votre lien.");
+    }
+  };
+
   return (
     <div className="w-full pb-32 sm:pb-0">
       <PageHeader
@@ -327,11 +339,20 @@ function SettingsContent() {
                       </span>
                     </div>
                     <button 
+                      type="button"
                       onClick={copyLink}
                       className="flex items-center justify-center gap-2 bg-white border border-primary/40 text-primary px-5 py-3 rounded-[20px] hover:bg-primary hover:text-white hover:border-primary transition-colors text-sm font-bold shadow-sm shrink-0"
                     >
                       <Copy className="w-4 h-4" />
                       Copier le lien
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={shareOnWhatsApp}
+                      className="flex items-center justify-center gap-2 bg-[#25D366] text-white px-5 py-3 rounded-[20px] hover:bg-[#1DA851] transition-colors text-sm font-bold shadow-sm shrink-0"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp
                     </button>
                   </div>
                 </div>

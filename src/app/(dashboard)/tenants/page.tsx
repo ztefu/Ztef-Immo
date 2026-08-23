@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Plus, Search, Filter, Eye } from "lucide-react";
+import { Plus, Search, Filter, Eye, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { Unit, Property, Tenant } from "@/lib/mock-data";
 import { addTenant, updateTenant, deleteTenant, addPayment } from "@/lib/supabase-api";
@@ -233,6 +233,21 @@ export default function TenantsPage() {
       header: "Actions",
       cell: (item: any) => (
         <div className="flex justify-end gap-1">
+          <button 
+            onClick={() => {
+              // Ensure we have a valid format (e.g. 237699... without '+')
+              // Note: If users store phone as '06...', it might need country code.
+              // For a simple wa.me link, we strip everything except numbers.
+              const formattedPhone = item.phone.replace(/[^0-9]/g, '');
+              const message = item.status === "En retard" 
+                ? `Bonjour ${item.fullName},\nSauf erreur de notre part, nous n'avons pas encore reçu le paiement de votre loyer.\nMerci de régulariser la situation au plus vite.\nCordialement.`
+                : `Bonjour ${item.fullName},`;
+              window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
+            }}
+            className="p-2 text-slate-400 hover:text-[#25D366] hover:bg-[#25D366]/10 rounded-full transition-colors" title="Contacter sur WhatsApp"
+          >
+            <MessageCircle className="h-4 w-4" />
+          </button>
           <Link href={`/tenants/${item.id}`}>
             <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="Voir profil">
               <Eye className="h-4 w-4" />
