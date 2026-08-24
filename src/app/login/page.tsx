@@ -55,7 +55,9 @@ export default function AdminLogin() {
           className="flex items-center gap-3 mb-8"
         >
           <div className="flex items-center justify-center">
-            <Image src="/logo.png" alt="Logo" width={72} height={72} className="object-contain drop-shadow-lg" />
+            <Link href="/">
+              <Image src="/logo.png" alt="Logo" width={72} height={72} className="object-contain drop-shadow-lg cursor-pointer hover:scale-105 transition-transform" />
+            </Link>
           </div>
         </motion.div>
         
