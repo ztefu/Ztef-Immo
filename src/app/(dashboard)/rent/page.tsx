@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Plus, Search, Filter, Wallet, TrendingUp, AlertCircle, Download, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Filter, Wallet, TrendingUp, AlertCircle, Download, CheckCircle2, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { Payment, Tenant } from "@/lib/mock-data";
 import { getPayments, getTenants, addPayment, getUnits, getProperties, getOwners } from "@/lib/supabase-api";
@@ -17,11 +17,13 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { ReceiptTemplate } from "@/components/ui/ReceiptTemplate";
 import { PDFPreviewModal } from "@/components/ui/PDFPreviewModal";
+import { WhatsAppBatchModal } from "@/components/ui/WhatsAppBatchModal";
 import { useCurrentAgency } from "@/hooks/useCurrentAgency";
 
 export default function RentPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const { currentAgency } = useCurrentAgency();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,9 +80,18 @@ export default function RentPage() {
   }).filter(p => p.tenantName.toLowerCase().includes(searchTerm.toLowerCase()) || p.month.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Stats
-  const totalCollected = payments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
-  const totalDue = payments.reduce((sum, p) => sum + (p.amountDue || 0), 0);
+  const totalCollected = enrichedPayments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
+  const totalDue = enrichedPayments.reduce((sum, p) => sum + (p.amountDue || 0), 0);
   const totalPending = totalDue - totalCollected;
+
+  // Calculate late tenants for WhatsApp Batch Reminder
+  const lateTenantsList = enrichedPayments
+    .filter(p => p.status === "En retard" || p.status === "Partiellement payé")
+    .map(p => {
+      const tenant = tenants.find(t => t.id === p.tenantId);
+      return tenant ? { tenant, amountDue: p.amountDue - p.amountPaid } : null;
+    })
+    .filter(Boolean) as { tenant: Tenant; amountDue: number }[];
 
   // Commission Calculation
   let totalCommission = 0;
@@ -275,9 +286,43 @@ export default function RentPage() {
       ),
     },
     {
-      header: "Reçu",
+      header: "Reçu & Relances",
       cell: (item: any) => (
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-1">
+          {/* Action 1: Quittance ou Relance selon le statut */}
+          {item.status === "Payé" || item.status === "Partiellement payé" ? (
+            <button 
+              onClick={() => {
+                const tenant = tenants.find(t => t.id === item.tenantId);
+                if (tenant) {
+                  const formattedPhone = tenant.phone.replace(/[^0-9]/g, '');
+                  const message = `Bonjour ${tenant.fullName},\n\nVotre quittance de loyer pour le mois de ${item.month} est disponible.\nVous pouvez la télécharger directement depuis votre espace locataire.\n\nCordialement, l'équipe de gestion.`;
+                  window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
+                }
+              }}
+              className="p-2 text-slate-400 hover:text-[#25D366] hover:bg-[#25D366]/10 rounded-full transition-colors"
+              title="Envoyer notification WhatsApp"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </button>
+          ) : (
+            <button 
+              onClick={() => {
+                const tenant = tenants.find(t => t.id === item.tenantId);
+                if (tenant) {
+                  const formattedPhone = tenant.phone.replace(/[^0-9]/g, '');
+                  const amountToPay = item.amountDue - item.amountPaid;
+                  const message = `Bonjour ${tenant.fullName},\n\nSauf erreur de notre part, nous n'avons pas encore reçu le paiement de votre loyer d'un montant de ${amountToPay.toLocaleString()} FCFA.\n\nMerci de régulariser la situation au plus vite.\n\nCordialement.`;
+                  window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
+                }
+              }}
+              className="p-2 text-slate-400 hover:text-[#25D366] hover:bg-[#25D366]/10 rounded-full transition-colors"
+              title="Relancer sur WhatsApp"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </button>
+          )}
+          
           <button 
             disabled={item.status === "En retard" || item.status === "En attente" || isDownloading === item.id}
             onClick={() => generatePDF(item)}
@@ -314,7 +359,21 @@ export default function RentPage() {
         title="Loyers & Paiements" 
         description="Suivi des encaissements et génération des quittances"
         actions={
-          <div className="hidden sm:block">
+          <div className="hidden sm:flex items-center gap-3">
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsWhatsAppModalOpen(true)}
+              className="flex h-11 items-center justify-center rounded-full bg-[#25D366] text-white px-5 text-sm font-bold shadow-lg shadow-[#25D366]/20 hover:bg-[#1fa952] transition-colors whitespace-nowrap"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Relances Rapides
+              {lateTenantsList.length > 0 && (
+                <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#25D366] text-xs">
+                  {lateTenantsList.length}
+                </span>
+              )}
+            </motion.button>
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -535,6 +594,12 @@ export default function RentPage() {
         pdfUrl={pdfPreviewData?.url || null}
         fileName={pdfPreviewData?.filename}
         title="Aperçu de la Quittance"
+      />
+      
+      <WhatsAppBatchModal 
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+        lateTenants={lateTenantsList}
       />
     </div>
   );
