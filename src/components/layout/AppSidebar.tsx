@@ -20,9 +20,11 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
+  ArrowRightLeft,
 } from "lucide-react";
 import { useCurrentAgency } from "@/hooks/useCurrentAgency";
 import { useNewTicketsCount } from "@/hooks/useNewTicketsCount";
+import { usePendingDelegationsCount } from "@/hooks/useDelegations";
 import { APP_NAME } from "@/lib/config";
 
 const navigation = [
@@ -40,6 +42,7 @@ const locativeNav = [
 
 const adminNav = [
   { name: "Maintenance", href: "/maintenance", icon: Wrench },
+  { name: "Gestion Déléguée", href: "/delegations", icon: ArrowRightLeft },
   { name: "Rapports", href: "/reports", icon: BarChart3 },
 ];
 
@@ -56,6 +59,7 @@ export function AppSidebar({
 }) {
   const pathname = usePathname();
   const { count: newTicketsCount, isLoadingCount } = useNewTicketsCount();
+  const { count: pendingDelegationsCount, isLoading: isLoadingDelegations } = usePendingDelegationsCount();
   const { currentAgency, isLoadingAgency } = useCurrentAgency();
 
   const agencyName = currentAgency?.name || APP_NAME;
@@ -120,6 +124,17 @@ export function AppSidebar({
                 : "absolute top-1 right-1 h-4 min-w-[16px] px-1 text-[9px] border-2 border-white shadow-sm"
             )}>
               {newTicketsCount > 99 ? '99+' : newTicketsCount}
+            </span>
+          )}
+          
+          {item.name === "Gestion Déléguée" && !isLoadingDelegations && pendingDelegationsCount > 0 && (
+            <span className={cn(
+              "bg-[#eab308] text-white font-bold rounded-full flex items-center justify-center transition-all",
+              isExpanded 
+                ? "h-5 min-w-[20px] px-1.5 text-[10px] ml-auto" 
+                : "absolute top-1 right-1 h-4 min-w-[16px] px-1 text-[9px] border-2 border-white shadow-sm"
+            )}>
+              {pendingDelegationsCount > 99 ? '99+' : pendingDelegationsCount}
             </span>
           )}
         </Link>

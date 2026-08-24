@@ -1,13 +1,14 @@
 "use client";
 
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Plus, Search, Filter, MapPin, Building2, Home, Users, Building, Trees } from "lucide-react";
+import { Plus, Search, Filter, MapPin, Building2, Home, Users, Building, Trees, ArrowRightLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { Property, Owner, Unit } from "@/lib/mock-data";
-import { getProperties, getOwners, getUnits, addProperty } from "@/lib/supabase-api";
+import { getProperties, getOwners, getUnits, addProperty, getPropertyDelegation, PropertyDelegation } from "@/lib/supabase-api";
 import { useProperties, useOwners, useUnits } from "@/hooks/useData";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Modal } from "@/components/ui/Modal";
+import { DelegationModal } from "@/components/ui/DelegationModal";
 import { PageHeaderSkeleton, PropertyCardSkeleton, FormSkeleton } from "@/components/ui/Skeletons";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -48,6 +49,28 @@ export default function PropertiesPage() {
   const { owners, isLoading: isOwnersLoading } = useOwners();
   const { units, isLoading: isUnitsLoading } = useUnits();
   const isLoading = isPropsLoading || isOwnersLoading || isUnitsLoading;
+
+  // Delegation state
+  const [delegationTarget, setDelegationTarget] = useState<{ id: string; name: string } | null>(null);
+  const [delegationStatuses, setDelegationStatuses] = useState<Record<string, PropertyDelegation | null>>({});
+
+  // Load delegation status for all properties (only for autonomous owners)
+  useEffect(() => {
+    if (!isOwner || properties.length === 0) return;
+    const loadDelegations = async () => {
+      const results: Record<string, PropertyDelegation | null> = {};
+      for (const p of properties) {
+        try {
+          const d = await getPropertyDelegation(p.id);
+          results[p.id] = d;
+        } catch {
+          results[p.id] = null;
+        }
+      }
+      setDelegationStatuses(results);
+    };
+    loadDelegations();
+  }, [isOwner, properties]);
 
   // Form states
   const [newName, setNewName] = useState("");
@@ -283,8 +306,20 @@ export default function PropertiesPage() {
                 {/* Property Type Icon Drawing */}
                 <div className="h-48 w-full relative bg-slate-50 flex items-center justify-center overflow-hidden">
                   <PropertyIcon type={property.type} className="h-28 w-28 text-slate-300 group-hover:text-primary/40 transition-colors duration-500 group-hover:scale-110" />
-                  <div className="absolute top-4 right-4 z-10">
+                  <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
                     <StatusBadge status={property.status} />
+                    {isOwner && delegationStatuses[property.id] && (
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-sm ${
+                        delegationStatuses[property.id]!.status === 'Acceptée'
+                          ? 'bg-[#dbeafe] text-[#3b82f6] border border-blue-200'
+                          : 'bg-[#fef08a] text-[#eab308] border border-yellow-200'
+                      }`}>
+                        <ArrowRightLeft className="h-3 w-3" />
+                        {delegationStatuses[property.id]!.status === 'Acceptée'
+                          ? `Gérée par ${delegationStatuses[property.id]!.agencyName || 'Agence'}`
+                          : 'Délégation en attente'}
+                      </span>
+                    )}
                   </div>
                   <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2">
                     <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center text-xs font-bold text-slate-700 shadow-sm">
@@ -335,8 +370,24 @@ export default function PropertiesPage() {
                       </div>
                       <span className="font-medium text-slate-700">{property.owner}</span>
                     </div>
-                    <div className="text-sm font-bold text-primary">
-                      Voir détails &rarr;
+                    <div className="flex items-center gap-2">
+                      {isOwner && !delegationStatuses[property.id] && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDelegationTarget({ id: property.id, name: property.name });
+                          }}
+                          className="flex items-center gap-1.5 text-xs font-bold text-[#3b82f6] bg-[#dbeafe] px-3 py-1.5 rounded-full hover:bg-[#3b82f6] hover:text-white transition-colors"
+                          title="Déléguer la gestion à une agence"
+                        >
+                          <ArrowRightLeft className="h-3 w-3" />
+                          Déléguer
+                        </button>
+                      )}
+                      <div className="text-sm font-bold text-primary">
+                        Voir détails &rarr;
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -345,6 +396,33 @@ export default function PropertiesPage() {
           );
         })}
       </motion.div>
+
+      {/* Delegation Modal */}
+      {delegationTarget && (
+        <DelegationModal
+          isOpen={!!delegationTarget}
+          onClose={() => setDelegationTarget(null)}
+          propertyId={delegationTarget.id}
+          propertyName={delegationTarget.name}
+          onSuccess={() => {
+            refreshProperties();
+            // Reload delegation statuses
+            const loadDelegations = async () => {
+              const results: Record<string, PropertyDelegation | null> = {};
+              for (const p of properties) {
+                try {
+                  const d = await getPropertyDelegation(p.id);
+                  results[p.id] = d;
+                } catch {
+                  results[p.id] = null;
+                }
+              }
+              setDelegationStatuses(results);
+            };
+            loadDelegations();
+          }}
+        />
+      )}
     </div>
   );
 }

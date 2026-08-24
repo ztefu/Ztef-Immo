@@ -1136,3 +1136,241 @@ export async function uploadContractPdf(tenantId: string, pdfBlob: Blob): Promis
   
   return publicUrl;
 }
+
+// =============================================
+// DELEGATION MANAGEMENT (Propriétaire → Agence)
+// =============================================
+
+export type PropertyDelegation = {
+  id: string;
+  propertyId: string;
+  ownerId: string;
+  agencyId: string;
+  status: 'En attente' | 'Acceptée' | 'Refusée' | 'Révoquée';
+  createdAt: string;
+  updatedAt: string;
+  // Joined data
+  propertyName?: string;
+  ownerName?: string;
+  agencyName?: string;
+};
+
+function mapDelegation(db: any): PropertyDelegation {
+  return {
+    id: db.id,
+    propertyId: db.property_id,
+    ownerId: db.owner_id,
+    agencyId: db.agency_id,
+    status: db.status,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+    propertyName: db.properties?.name || db.property_name,
+    ownerName: db.owners?.full_name || db.owner_name,
+    agencyName: db.agencies?.name || db.agency_name,
+  };
+}
+
+/**
+ * Search for an agency by its slug (for owners to find an agency to delegate to)
+ */
+export async function searchAgencyBySlug(slug: string) {
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
+    .from('agencies')
+    .select('id, name, slug, contact_email, contact_phone, address')
+    .eq('slug', slug)
+    .single();
+  if (error || !data) return null;
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+    contactEmail: data.contact_email,
+    contactPhone: data.contact_phone,
+    address: data.address,
+  };
+}
+
+/**
+ * Request delegation of a property to an agency (called by owner)
+ */
+export async function requestDelegation(propertyId: string, agencySlug: string) {
+  const adminClient = createAdminClient();
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Vous devez être connecté.");
+
+  // Get owner ID
+  const { data: owner } = await adminClient
+    .from('owners')
+    .select('id')
+    .eq('auth_id', user.id)
+    .single();
+  if (!owner) throw new Error("Vous n'êtes pas un propriétaire enregistré.");
+
+  // Find the agency by slug
+  const { data: agency } = await adminClient
+    .from('agencies')
+    .select('id, name')
+    .eq('slug', agencySlug)
+    .single();
+  if (!agency) throw new Error("Aucune agence trouvée avec cet identifiant.");
+
+  // Verify property belongs to this owner
+  const { data: property } = await adminClient
+    .from('properties')
+    .select('id, owner_id')
+    .eq('id', propertyId)
+    .eq('owner_id', owner.id)
+    .single();
+  if (!property) throw new Error("Cette propriété ne vous appartient pas.");
+
+  // Check if a delegation already exists for this property+agency
+  const { data: existing } = await adminClient
+    .from('property_delegations')
+    .select('id, status')
+    .eq('property_id', propertyId)
+    .eq('agency_id', agency.id)
+    .in('status', ['En attente', 'Acceptée'])
+    .maybeSingle();
+  if (existing) {
+    if (existing.status === 'Acceptée') throw new Error("Cette propriété est déjà gérée par cette agence.");
+    if (existing.status === 'En attente') throw new Error("Une demande est déjà en cours pour cette propriété.");
+  }
+
+  // Create the delegation request
+  const { data: delegation, error } = await adminClient
+    .from('property_delegations')
+    .insert({
+      property_id: propertyId,
+      owner_id: owner.id,
+      agency_id: agency.id,
+      status: 'En attente',
+    })
+    .select()
+    .single();
+  if (error) throw error;
+
+  return { ...mapDelegation(delegation), agencyName: agency.name };
+}
+
+/**
+ * Get all delegations visible to the current user (owner or agency)
+ */
+export async function getDelegations() {
+  const adminClient = createAdminClient();
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const context = await getManagerContext(user.id);
+  if (!context) return [];
+
+  let query = adminClient
+    .from('property_delegations')
+    .select(`
+      *,
+      properties:property_id(name),
+      owners:owner_id(full_name),
+      agencies:agency_id(name)
+    `)
+    .order('created_at', { ascending: false });
+
+  if (context.type === 'agency') {
+    query = query.eq('agency_id', context.agencyId);
+  } else {
+    query = query.eq('owner_id', context.ownerId);
+  }
+
+  const { data, error } = await query;
+  if (error) { console.error('getDelegations error:', error); return []; }
+  return (data || []).map(mapDelegation);
+}
+
+/**
+ * Accept a delegation request (called by agency manager)
+ */
+export async function acceptDelegation(delegationId: string) {
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
+    .from('property_delegations')
+    .update({ status: 'Acceptée' })
+    .eq('id', delegationId)
+    .eq('status', 'En attente')
+    .select()
+    .single();
+  if (error) throw error;
+  revalidatePath('/', 'layout');
+  return mapDelegation(data);
+}
+
+/**
+ * Reject a delegation request (called by agency manager)
+ */
+export async function rejectDelegation(delegationId: string) {
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
+    .from('property_delegations')
+    .update({ status: 'Refusée' })
+    .eq('id', delegationId)
+    .eq('status', 'En attente')
+    .select()
+    .single();
+  if (error) throw error;
+  return mapDelegation(data);
+}
+
+/**
+ * Revoke a delegation (called by owner to take back control)
+ */
+export async function revokeDelegation(delegationId: string) {
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
+    .from('property_delegations')
+    .update({ status: 'Révoquée' })
+    .eq('id', delegationId)
+    .eq('status', 'Acceptée')
+    .select()
+    .single();
+  if (error) throw error;
+  revalidatePath('/', 'layout');
+  return mapDelegation(data);
+}
+
+/**
+ * Get the active delegation for a property (if any)
+ */
+export async function getPropertyDelegation(propertyId: string): Promise<PropertyDelegation | null> {
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
+    .from('property_delegations')
+    .select(`
+      *,
+      agencies:agency_id(name)
+    `)
+    .eq('property_id', propertyId)
+    .in('status', ['En attente', 'Acceptée'])
+    .maybeSingle();
+  if (error || !data) return null;
+  return mapDelegation(data);
+}
+
+/**
+ * Get count of pending delegation requests for the current agency
+ */
+export async function getPendingDelegationsCount(): Promise<number> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 0;
+  const context = await getManagerContext(user.id);
+  if (!context || context.type !== 'agency') return 0;
+
+  const adminClient = createAdminClient();
+  const { count, error } = await adminClient
+    .from('property_delegations')
+    .select('*', { count: 'exact', head: true })
+    .eq('agency_id', context.agencyId)
+    .eq('status', 'En attente');
+  if (error) return 0;
+  return count || 0;
+}
