@@ -53,6 +53,7 @@ export async function getCurrentAgency(providedUserId?: string) {
         id: owner.id,
         name: owner.full_name,
         slug: owner.slug,
+        isVirtual: true,
         logoUrl: undefined,
         contactEmail: owner.email,
         contactPhone: owner.phone,

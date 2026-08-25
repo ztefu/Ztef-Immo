@@ -11,6 +11,7 @@ interface ContractTemplateProps {
 export function ContractTemplate({ tenant, unit, agency, property }: ContractTemplateProps) {
   const bailleurName = property?.owner || "Le Propriétaire";
   const agencyName = agency?.name || APP_NAME;
+  const headerName = agency?.isVirtual ? APP_NAME : agencyName;
   
   return (
     <div 
@@ -25,7 +26,7 @@ export function ContractTemplate({ tenant, unit, agency, property }: ContractTem
             <img src={agency.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
           )}
           <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight">{agencyName}</h1>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight">{headerName}</h1>
             <p className="text-slate-500 mt-2 font-medium">Gestion locative premium</p>
           </div>
         </div>
@@ -46,13 +47,15 @@ export function ContractTemplate({ tenant, unit, agency, property }: ContractTem
           <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Le Bailleur</h3>
           <p className="font-bold text-slate-900">{bailleurName}</p>
           <p className="text-slate-600 mt-1 italic text-xs mb-2">Propriétaire du bien</p>
-          <div className="border-t border-slate-200 pt-2 mt-2">
-            <p className="text-slate-500 text-xs font-semibold mb-1">Représenté par le mandataire :</p>
-            <p className="font-medium text-slate-900 text-sm">{agencyName}</p>
-            <p className="text-slate-600 mt-1">{agency?.address || "123 Avenue de la République"}</p>
-            {agency?.contactPhone && <p className="text-slate-600">{agency.contactPhone}</p>}
-            <p className="text-slate-600">{agency?.contactEmail || `contact@${APP_NAME.toLowerCase().replace(/[^a-z0-9]/g, "")}.com`}</p>
-          </div>
+          {!agency?.isVirtual && (
+            <div className="border-t border-slate-200 pt-2 mt-2">
+              <p className="text-slate-500 text-xs font-semibold mb-1">Représenté par le mandataire :</p>
+              <p className="font-medium text-slate-900 text-sm">{agencyName}</p>
+              <p className="text-slate-600 mt-1">{agency?.address || "123 Avenue de la République"}</p>
+              {agency?.contactPhone && <p className="text-slate-600">{agency.contactPhone}</p>}
+              <p className="text-slate-600">{agency?.contactEmail || `contact@${APP_NAME.toLowerCase().replace(/[^a-z0-9]/g, "")}.com`}</p>
+            </div>
+          )}
         </div>
         <div className="w-1/2 bg-slate-50 p-5 rounded-xl border border-slate-200">
           <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Le Preneur</h3>
@@ -91,24 +94,9 @@ export function ContractTemplate({ tenant, unit, agency, property }: ContractTem
         </ul>
       </div>
 
-      {/* Signature */}
-      <div className="mt-20 pt-8 border-t border-slate-900 flex justify-between items-end">
-        <div className="w-1/2 text-center">
-          <p className="font-bold text-slate-900 mb-16">Le Bailleur / Le Mandataire ({agencyName})</p>
-          <div className="w-48 h-10 border-b-2 border-slate-300 border-dashed mx-auto flex items-end justify-center pb-2">
-             <span className="text-slate-300 text-xs italic">Signature électronique</span>
-          </div>
-        </div>
-        <div className="w-1/2 text-center">
-          <p className="font-bold text-slate-900 mb-16">Le Preneur ({tenant.fullName})</p>
-          <div className="w-48 h-10 border-b-2 border-slate-300 border-dashed mx-auto flex items-end justify-center pb-2">
-            <span className="text-slate-300 text-xs italic">Lu et approuvé</span>
-          </div>
-        </div>
-      </div>
       
-      <div className="mt-8 text-center text-xs text-slate-400 border-t border-slate-100 pt-4">
-        Document appartenant à <strong>{agencyName}</strong> <br/>
+      {/* Footer */}
+      <div className="mt-20 border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
         Généré avec <span className="font-semibold text-primary">{APP_NAME}</span>
       </div>
     </div>

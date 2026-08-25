@@ -78,70 +78,65 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
-    <div className="min-h-screen bg-slate-50 selection:bg-slate-900 selection:text-white">
+    <div className="min-h-screen selection:bg-slate-900 selection:text-white relative z-0">
+      {/* GLOBAL FIXED BACKGROUND FOR TRUE PARALLAX */}
+      <div className="fixed inset-0 -z-20">
+        <Image 
+          src="/images/hero_dashboard.jpg" 
+          alt="Interface du Dashboard Mazeno" 
+          fill
+          className="object-cover object-left md:object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-[2px]"></div>
+      </div>
+
       <PublicHeader />
 
       <main>
-        {/* HERO SECTION */}
-        <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+        <section className="relative pt-32 pb-32 px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-[80vh]">
+          <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center mt-12 mb-12">
             <motion.div 
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
-              className="flex-1 text-center lg:text-left"
+              className="text-center w-full"
             >
-              <motion.h1 variants={fadeUpVariant} className="text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1] mb-6">
-                Gérez vos biens, vos locataires et vos loyers depuis <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500">
-                  un seul endroit.
-                </span>
+              <motion.h1 variants={fadeUpVariant} className="text-[28px] sm:text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.2] lg:leading-[1.1] mb-6">
+                Gérez vos biens, vos locataires et vos loyers depuis <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500">un seul endroit.</span>
               </motion.h1>
-              <motion.p variants={fadeUpVariant} className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto lg:mx-0">
+              <motion.p variants={fadeUpVariant} className="text-base sm:text-lg text-slate-700 mb-8 max-w-2xl mx-auto font-medium">
                 Fini les cahiers, les fichiers Excel et les relances oubliées. Centralisez votre gestion locative et gardez le contrôle de vos revenus.
               </motion.p>
               
-              <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-                <Link href="/signup">
+              <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row items-center gap-4 justify-center">
+                <Link href="/signup" className="w-full sm:w-auto">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex h-14 items-center justify-center bg-slate-900 text-white px-8 rounded-full text-base font-semibold shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-slate-800 transition-all w-full sm:w-auto"
+                    className="flex h-14 items-center justify-center bg-slate-900 text-white px-8 rounded-full text-base font-semibold shadow-xl hover:bg-slate-800 transition-all w-full"
                   >
                     Démarrer gratuitement
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </motion.button>
                 </Link>
-                <p className="text-sm text-slate-500 sm:ml-4">
+                <p className="text-sm font-semibold text-slate-700 bg-white/50 py-2 px-4 rounded-full backdrop-blur-sm sm:ml-4">
                   Sans carte de crédit. Annulable à tout moment.
                 </p>
               </motion.div>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, rotate: -2 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="flex-1 relative w-full"
-            >
-              <div className="absolute inset-0 bg-gradient-to-tr from-slate-200 to-white/0 rounded-[32px] transform rotate-3 scale-105 -z-10 blur-xl opacity-50"></div>
-              <div className="relative rounded-[32px] overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] border border-slate-200 bg-white group">
-                <Image 
-                  src="/images/hero_dashboard.jpg" 
-                  alt="Interface du Dashboard Mazeno" 
-                  width={800} 
-                  height={600}
-                  className="w-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-              </div>
             </motion.div>
           </div>
         </section>
 
         {/* TRUST BADGES */}
-        <section className="py-10 border-y border-slate-100 bg-white overflow-hidden relative">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="pt-2 pb-10 bg-white relative">
+          {/* Top Wave Divider */}
+          <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-10 -translate-y-[99%]">
+            <svg className="relative block w-full h-[60px] md:h-[120px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-white"></path>
+            </svg>
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.p 
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -155,26 +150,30 @@ export default function LandingPage() {
               <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none hidden sm:block"></div>
               <motion.div 
                 animate={{ x: ["0%", "-50%"] }}
-                transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                className="flex whitespace-nowrap min-w-max items-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700"
+                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                className="flex whitespace-nowrap min-w-max"
               >
-                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Building className="h-6 w-6 text-indigo-500"/> Horizon Immo</div>
-                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Briefcase className="h-6 w-6 text-blue-500"/> Prestige Gestion</div>
-                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Key className="h-6 w-6 text-amber-500"/> Clef d'Or</div>
-                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Landmark className="h-6 w-6 text-emerald-500"/> Patrimoine Plus</div>
+                <div className="flex items-center gap-12 md:gap-24 pr-12 md:pr-24 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+                  <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Building className="h-6 w-6 text-indigo-500"/> Horizon Immo</div>
+                  <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Briefcase className="h-6 w-6 text-blue-500"/> Prestige Gestion</div>
+                  <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Key className="h-6 w-6 text-amber-500"/> Clef d'Or</div>
+                  <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Landmark className="h-6 w-6 text-emerald-500"/> Patrimoine Plus</div>
+                </div>
                 
-                {/* Duplicated for seamless loop */}
-                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Building className="h-6 w-6 text-indigo-500"/> Horizon Immo</div>
-                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Briefcase className="h-6 w-6 text-blue-500"/> Prestige Gestion</div>
-                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Key className="h-6 w-6 text-amber-500"/> Clef d'Or</div>
-                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Landmark className="h-6 w-6 text-emerald-500"/> Patrimoine Plus</div>
+                {/* Exact duplicate for seamless loop */}
+                <div className="flex items-center gap-12 md:gap-24 pr-12 md:pr-24 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+                  <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Building className="h-6 w-6 text-indigo-500"/> Horizon Immo</div>
+                  <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Briefcase className="h-6 w-6 text-blue-500"/> Prestige Gestion</div>
+                  <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Key className="h-6 w-6 text-amber-500"/> Clef d'Or</div>
+                  <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Landmark className="h-6 w-6 text-emerald-500"/> Patrimoine Plus</div>
+                </div>
               </motion.div>
             </div>
           </div>
         </section>
 
         {/* MULTI-PERSONA SECTION */}
-        <section id="personas" className="py-24 bg-white border-b border-slate-100 relative">
+        <section id="personas" className="py-24 bg-white relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
@@ -226,7 +225,13 @@ export default function LandingPage() {
         </section>
 
         {/* INTERACTIVE HOW IT WORKS SECTION */}
-        <section id="features" className="py-24 bg-slate-50 relative overflow-hidden">
+        <section id="features" className="py-32 bg-slate-50 relative mt-16">
+          {/* Top Wave Divider */}
+          <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-10 -translate-y-[99%] drop-shadow-sm">
+            <svg className="relative block w-full h-[60px] md:h-[120px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-slate-50"></path>
+            </svg>
+          </div>
           <div className="absolute inset-0 bg-grid-slate-200/[0.04] bg-[bottom_1px_center] z-0"></div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div 
@@ -285,7 +290,13 @@ export default function LandingPage() {
         </section>
 
         {/* CONÇU POUR L'AFRIQUE */}
-        <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
+        <section className="py-32 bg-slate-900 text-white relative mt-16">
+          {/* Top Wave Divider */}
+          <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-10 -translate-y-[99%]">
+            <svg className="relative block w-full h-[60px] md:h-[120px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-slate-900"></path>
+            </svg>
+          </div>
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-slate-950 pointer-events-none"></div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -345,8 +356,14 @@ export default function LandingPage() {
         </section>
 
         {/* CYCLE COMPLET SECTION */}
-        <section id="cycle-complet" className="py-24 bg-slate-50 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="cycle-complet" className="py-32 bg-slate-50 relative mt-16">
+          {/* Top Wave Divider */}
+          <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-10 -translate-y-[99%]">
+            <svg className="relative block w-full h-[60px] md:h-[120px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-slate-50"></path>
+            </svg>
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-4">
                 Pas juste un logiciel d'encaissement.
@@ -372,7 +389,8 @@ export default function LandingPage() {
                 className="hidden lg:block absolute top-1/2 left-0 h-1 bg-slate-200 -translate-y-1/2 z-0 rounded-full"
               ></motion.div>
               
-              <div className="flex overflow-x-auto snap-x snap-mandatory lg:flex-row lg:overflow-x-visible items-center lg:justify-between gap-4 lg:gap-6 relative z-10 py-6 px-4 -mx-4 sm:px-6 sm:-mx-6 lg:mx-0 lg:px-0 lg:py-0 hide-scrollbar">
+              {/* Desktop View (Static Grid/Row) */}
+              <div className="hidden lg:flex items-center justify-between gap-6 relative z-10 py-0">
                 {[
                   { icon: Building2, label: "Bien", color: "text-slate-700", bg: "bg-slate-100" },
                   { icon: Home, label: "Logement", color: "text-slate-700", bg: "bg-slate-100" },
@@ -387,22 +405,86 @@ export default function LandingPage() {
                   <motion.div 
                     key={i}
                     variants={scaleUpVariant}
-                    className="shrink-0 snap-center flex flex-col items-center gap-3 w-32 lg:w-auto bg-white lg:bg-transparent p-4 lg:p-0 rounded-[24px] lg:rounded-none shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] lg:shadow-none hover:-translate-y-2 hover:scale-110 transition-transform duration-300 cursor-default"
+                    className="flex flex-col items-center gap-3 w-auto bg-transparent p-0 border-none shadow-none hover:-translate-y-2 hover:scale-110 transition-transform duration-300 cursor-default"
                   >
-                    <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-sm ${step.bg}`}>
-                      <step.icon className={`h-6 w-6 lg:h-7 lg:w-7 ${step.color}`} />
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-sm ${step.bg}`}>
+                      <step.icon className={`h-7 w-7 ${step.color}`} />
                     </div>
                     <span className="font-bold text-sm text-slate-900 text-center w-full">{step.label}</span>
                   </motion.div>
                 ))}
+              </div>
+
+              {/* Mobile View (Infinite Auto-scroll Marquee) */}
+              <div className="lg:hidden overflow-hidden w-full relative pb-4">
+                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-50 to-transparent z-20 pointer-events-none"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent z-20 pointer-events-none"></div>
+                <motion.div 
+                  animate={{ x: ["0%", "-50%"] }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  className="flex whitespace-nowrap min-w-max relative z-10"
+                >
+                  <div className="flex gap-4 pr-4">
+                    {[
+                      { icon: Building2, label: "Bien", color: "text-slate-700", bg: "bg-slate-100" },
+                      { icon: Home, label: "Logement", color: "text-slate-700", bg: "bg-slate-100" },
+                      { icon: User, label: "Locataire", color: "text-blue-600", bg: "bg-blue-100" },
+                      { icon: FileText, label: "Contrat", color: "text-amber-600", bg: "bg-amber-100" },
+                      { icon: Wallet, label: "Loyer", color: "text-emerald-600", bg: "bg-emerald-100" },
+                      { icon: CheckCircle2, label: "Paiement", color: "text-emerald-600", bg: "bg-emerald-100" },
+                      { icon: FileText, label: "Quittance", color: "text-purple-600", bg: "bg-purple-100" },
+                      { icon: PenTool, label: "Maintenance", color: "text-rose-600", bg: "bg-rose-100" },
+                      { icon: PieChart, label: "Rapport", color: "text-slate-900", bg: "bg-slate-200" }
+                    ].map((step, i) => (
+                      <div 
+                        key={i}
+                        className="shrink-0 flex flex-col items-center gap-3 w-32 bg-white p-4 rounded-[24px] shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] cursor-default"
+                      >
+                        <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-sm ${step.bg}`}>
+                          <step.icon className={`h-6 w-6 ${step.color}`} />
+                        </div>
+                        <span className="font-bold text-sm text-slate-900 text-center w-full">{step.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Exact duplicate for seamless loop */}
+                  <div className="flex gap-4 pr-4">
+                    {[
+                      { icon: Building2, label: "Bien", color: "text-slate-700", bg: "bg-slate-100" },
+                      { icon: Home, label: "Logement", color: "text-slate-700", bg: "bg-slate-100" },
+                      { icon: User, label: "Locataire", color: "text-blue-600", bg: "bg-blue-100" },
+                      { icon: FileText, label: "Contrat", color: "text-amber-600", bg: "bg-amber-100" },
+                      { icon: Wallet, label: "Loyer", color: "text-emerald-600", bg: "bg-emerald-100" },
+                      { icon: CheckCircle2, label: "Paiement", color: "text-emerald-600", bg: "bg-emerald-100" },
+                      { icon: FileText, label: "Quittance", color: "text-purple-600", bg: "bg-purple-100" },
+                      { icon: PenTool, label: "Maintenance", color: "text-rose-600", bg: "bg-rose-100" },
+                      { icon: PieChart, label: "Rapport", color: "text-slate-900", bg: "bg-slate-200" }
+                    ].map((step, i) => (
+                      <div 
+                        key={i}
+                        className="shrink-0 flex flex-col items-center gap-3 w-32 bg-white p-4 rounded-[24px] shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] cursor-default"
+                      >
+                        <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-sm ${step.bg}`}>
+                          <step.icon className={`h-6 w-6 ${step.color}`} />
+                        </div>
+                        <span className="font-bold text-sm text-slate-900 text-center w-full">{step.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
           </div>
         </section>
 
         {/* PRICING SECTION */}
-        <section id="pricing" className="py-24 bg-white border-y border-slate-100 relative">
-          <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-slate-50 to-transparent"></div>
+        <section id="pricing" className="py-32 bg-white relative mt-16">
+          {/* Top Wave Divider */}
+          <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-10 -translate-y-[99%]">
+            <svg className="relative block w-full h-[60px] md:h-[120px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-white"></path>
+            </svg>
+          </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
@@ -523,8 +605,14 @@ export default function LandingPage() {
         </section>
 
         {/* FAQ SECTION */}
-        <section id="faq" className="py-24 bg-slate-50 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-200/50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+        <section id="faq" className="py-32 bg-slate-50 relative mt-16">
+          {/* Top Wave Divider */}
+          <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-10 -translate-y-[99%]">
+            <svg className="relative block w-full h-[60px] md:h-[120px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-slate-50"></path>
+            </svg>
+          </div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-200/50 rounded-full blur-3xl z-0 translate-x-1/2 -translate-y-1/2"></div>
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}

@@ -14,6 +14,7 @@ export interface Agency {
   contactPhone?: string;
   address?: string;
   tenantAccessCode?: string;
+  isVirtual?: boolean;
 }
 
 export interface Owner {

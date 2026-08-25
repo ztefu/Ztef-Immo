@@ -9,6 +9,8 @@ interface ReceiptTemplateProps {
 }
 
 export function ReceiptTemplate({ tenant, payment, unit, agency }: ReceiptTemplateProps) {
+  const headerName = agency?.isVirtual ? APP_NAME : (agency?.name || APP_NAME);
+
   return (
     <div 
       id={`receipt-pdf-template-${payment.id}`} 
@@ -22,7 +24,7 @@ export function ReceiptTemplate({ tenant, payment, unit, agency }: ReceiptTempla
             <img src={agency.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
           )}
           <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight">{agency?.name || APP_NAME}</h1>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight">{headerName}</h1>
             <p className="text-slate-500 mt-2 font-medium">Gestion locative premium</p>
           </div>
         </div>
@@ -105,19 +107,12 @@ export function ReceiptTemplate({ tenant, payment, unit, agency }: ReceiptTempla
         </div>
       </div>
 
-      {/* Footer / Signature */}
-      <div className="mt-auto pt-8 border-t border-slate-100 flex justify-between items-end">
-        <div>
-          <p className="text-sm text-slate-500 italic">Quittance générée électroniquement le {new Date().toLocaleDateString('fr-FR')}</p>
-          <p className="text-sm text-slate-500 italic mt-1">Valable pour servir et valoir ce que de droit.</p>
-          <div className="mt-4 text-xs text-slate-400">
-            Document appartenant à <strong>{agency?.name || APP_NAME}</strong> <br/>
-            Généré avec <span className="font-semibold text-primary">{APP_NAME}</span>
-          </div>
-        </div>
-        <div className="text-center">
-          <p className="font-bold text-slate-900 mb-8">Le Gestionnaire</p>
-          <div className="w-32 h-16 border-b-2 border-slate-200 border-dashed mx-auto"></div>
+      {/* Footer */}
+      <div className="mt-auto pt-8 border-t border-slate-100">
+        <p className="text-sm text-slate-500 italic text-center">Quittance générée électroniquement le {new Date().toLocaleDateString('fr-FR')}</p>
+        <p className="text-sm text-slate-500 italic mt-1 text-center">Valable pour servir et valoir ce que de droit.</p>
+        <div className="mt-6 text-xs text-slate-400 text-center">
+          Généré avec <span className="font-semibold text-primary">{APP_NAME}</span>
         </div>
       </div>
     </div>
