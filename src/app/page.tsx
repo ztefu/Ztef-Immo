@@ -78,7 +78,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
-    <div className="min-h-screen selection:bg-slate-900 selection:text-white relative z-0">
+    <div className="min-h-screen selection:bg-slate-900 selection:text-white relative z-0 overflow-x-hidden">
       {/* GLOBAL FIXED BACKGROUND FOR TRUE PARALLAX */}
       <div className="fixed inset-0 -z-20">
         <Image 
