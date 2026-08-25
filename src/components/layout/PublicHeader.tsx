@@ -15,8 +15,13 @@ export function PublicHeader() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Logo Mazeno" width={40} height={40} className="object-contain drop-shadow-sm" />
-            <span className="text-xl font-bold tracking-tight text-slate-900 hidden sm:block">
+            <motion.div 
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 2, repeat: 15, ease: "easeInOut" }}
+            >
+              <Image src="/logo.png" alt="Logo Mazeno" width={40} height={40} className="object-contain drop-shadow-sm" />
+            </motion.div>
+            <span className="text-xl font-bold tracking-tight text-slate-900 block">
               Mazeno
             </span>
           </Link>

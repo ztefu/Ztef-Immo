@@ -83,7 +83,12 @@ function PortalLoginContent() {
             <img src={agency.logoUrl} alt="Logo de l'agence" className="w-12 h-12 rounded-2xl object-contain shadow-md bg-white" />
           ) : (
             <div className="flex items-center justify-center">
-              <Image src="/logo.png" alt="Logo" width={72} height={72} className="object-contain drop-shadow-xl" />
+              <motion.div 
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 2, repeat: 15, ease: "easeInOut" }}
+              >
+                <Image src="/logo.png" alt="Logo" width={72} height={72} className="object-contain drop-shadow-xl" />
+              </motion.div>
             </div>
           )}
         </motion.div>

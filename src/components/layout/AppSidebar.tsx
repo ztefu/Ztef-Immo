@@ -178,7 +178,12 @@ export function AppSidebar({
           <div className={cn("flex h-16 sm:h-24 shrink-0 items-center", isExpanded ? "justify-start pl-2" : "justify-center")}>
             <Link href="/dashboard" className="flex items-center gap-3" title={!isExpanded ? APP_NAME : undefined}>
               <div className="flex-shrink-0 flex items-center justify-center -ml-2">
+              <motion.div 
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 2, repeat: 15, ease: "easeInOut" }}
+              >
                 <Image src="/logo.png" alt="Logo" width={36} height={36} className="object-contain drop-shadow-md" />
+              </motion.div>
               </div>
               {isLoadingAgency ? (
                 <div className={cn("h-6 bg-slate-200/60 animate-pulse rounded-md", !isExpanded && "hidden", isExpanded ? "w-32" : "w-20")}></div>

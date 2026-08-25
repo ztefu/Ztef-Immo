@@ -52,7 +52,12 @@ export default function SignupOwnerPage() {
           className="flex items-center gap-3 mb-8"
         >
           <div className="flex items-center justify-center">
-            <Image src="/logo.png" alt="Logo" width={72} height={72} className="object-contain drop-shadow-lg" />
+            <motion.div 
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 2, repeat: 15, ease: "easeInOut" }}
+            >
+              <Image src="/logo.png" alt="Logo" width={72} height={72} className="object-contain drop-shadow-lg" />
+            </motion.div>
           </div>
         </motion.div>
 

@@ -99,7 +99,12 @@ export function AdminSidebar({
             <div className={cn("flex h-16 sm:h-24 shrink-0 items-center", isExpanded ? "justify-start pl-2" : "justify-center")}>
               <Link href="/admin" className="flex items-center gap-3" title={!isExpanded ? "Super Admin" : undefined}>
                 <div className="flex-shrink-0 flex items-center justify-center -ml-2">
-                  <Image src="/logo.png" alt="Logo" width={36} height={36} className="object-contain drop-shadow-md grayscale" />
+                  <motion.div 
+                    animate={{ y: [0, -4, 0] }}
+                    transition={{ duration: 2, repeat: 15, ease: "easeInOut" }}
+                  >
+                    <Image src="/logo.png" alt="Logo" width={36} height={36} className="object-contain drop-shadow-md grayscale" />
+                  </motion.div>
                 </div>
                 <span className={cn("font-extrabold text-slate-800 tracking-tight block transition-all", 
                   !isExpanded && "lg:hidden", "text-[18px]"

@@ -86,22 +86,22 @@ export default function LandingPage() {
         <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
               className="flex-1 text-center lg:text-left"
             >
-              <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1] mb-6">
-                La gestion immobilière,<br/>
+              <motion.h1 variants={fadeUpVariant} className="text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1] mb-6">
+                Gérez vos biens, vos locataires et vos loyers depuis <br/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500">
-                  simplement.
+                  un seul endroit.
                 </span>
-              </h1>
-              <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto lg:mx-0">
+              </motion.h1>
+              <motion.p variants={fadeUpVariant} className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto lg:mx-0">
                 Fini les cahiers, les fichiers Excel et les relances oubliées. Centralisez votre gestion locative et gardez le contrôle de vos revenus.
-              </p>
+              </motion.p>
               
-              <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+              <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
                 <Link href="/signup">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -115,7 +115,7 @@ export default function LandingPage() {
                 <p className="text-sm text-slate-500 sm:ml-4">
                   Sans carte de crédit. Annulable à tout moment.
                 </p>
-              </div>
+              </motion.div>
             </motion.div>
 
             <motion.div 
@@ -150,18 +150,26 @@ export default function LandingPage() {
             >
               Déjà adopté par les agences immobilières modernes
             </motion.p>
-            <motion.div 
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: false, margin: "-50px" }}
-              className="flex flex-wrap justify-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700"
-            >
-              <motion.div variants={fadeUpVariant} className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Building className="h-6 w-6 text-indigo-500"/> Horizon Immo</motion.div>
-              <motion.div variants={fadeUpVariant} className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Briefcase className="h-6 w-6 text-blue-500"/> Prestige Gestion</motion.div>
-              <motion.div variants={fadeUpVariant} className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Key className="h-6 w-6 text-amber-500"/> Clef d'Or</motion.div>
-              <motion.div variants={fadeUpVariant} className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Landmark className="h-6 w-6 text-emerald-500"/> Patrimoine Plus</motion.div>
-            </motion.div>
+            <div className="overflow-hidden w-full relative">
+              <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none hidden sm:block"></div>
+              <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none hidden sm:block"></div>
+              <motion.div 
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                className="flex whitespace-nowrap min-w-max items-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700"
+              >
+                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Building className="h-6 w-6 text-indigo-500"/> Horizon Immo</div>
+                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Briefcase className="h-6 w-6 text-blue-500"/> Prestige Gestion</div>
+                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Key className="h-6 w-6 text-amber-500"/> Clef d'Or</div>
+                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Landmark className="h-6 w-6 text-emerald-500"/> Patrimoine Plus</div>
+                
+                {/* Duplicated for seamless loop */}
+                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Building className="h-6 w-6 text-indigo-500"/> Horizon Immo</div>
+                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Briefcase className="h-6 w-6 text-blue-500"/> Prestige Gestion</div>
+                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Key className="h-6 w-6 text-amber-500"/> Clef d'Or</div>
+                <div className="flex items-center gap-2 text-xl font-bold text-slate-800 hover:text-slate-900 hover:scale-105 transition-all"><Landmark className="h-6 w-6 text-emerald-500"/> Patrimoine Plus</div>
+              </motion.div>
+            </div>
           </div>
         </section>
 
@@ -364,7 +372,7 @@ export default function LandingPage() {
                 className="hidden lg:block absolute top-1/2 left-0 h-1 bg-slate-200 -translate-y-1/2 z-0 rounded-full"
               ></motion.div>
               
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
+              <div className="flex overflow-x-auto snap-x snap-mandatory lg:flex-row lg:overflow-x-visible items-center lg:justify-between gap-4 lg:gap-6 relative z-10 py-6 px-4 -mx-4 sm:px-6 sm:-mx-6 lg:mx-0 lg:px-0 lg:py-0 hide-scrollbar">
                 {[
                   { icon: Building2, label: "Bien", color: "text-slate-700", bg: "bg-slate-100" },
                   { icon: Home, label: "Logement", color: "text-slate-700", bg: "bg-slate-100" },
@@ -379,12 +387,12 @@ export default function LandingPage() {
                   <motion.div 
                     key={i}
                     variants={scaleUpVariant}
-                    className="flex lg:flex-col items-center gap-4 lg:gap-3 w-full lg:w-auto bg-white lg:bg-transparent p-4 lg:p-0 rounded-2xl lg:rounded-none border lg:border-none border-slate-100 shadow-sm lg:shadow-none hover:-translate-y-2 hover:scale-110 transition-transform duration-300 cursor-default"
+                    className="shrink-0 snap-center flex flex-col items-center gap-3 w-32 lg:w-auto bg-white lg:bg-transparent p-4 lg:p-0 rounded-[24px] lg:rounded-none shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] lg:shadow-none hover:-translate-y-2 hover:scale-110 transition-transform duration-300 cursor-default"
                   >
-                    <div className={`w-12 h-12 lg:w-16 lg:h-16 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-sm ${step.bg}`}>
-                      <step.icon className={`h-5 w-5 lg:h-7 lg:w-7 ${step.color}`} />
+                    <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-sm ${step.bg}`}>
+                      <step.icon className={`h-6 w-6 lg:h-7 lg:w-7 ${step.color}`} />
                     </div>
-                    <span className="font-bold text-sm text-slate-900 lg:text-center w-full">{step.label}</span>
+                    <span className="font-bold text-sm text-slate-900 text-center w-full">{step.label}</span>
                   </motion.div>
                 ))}
               </div>

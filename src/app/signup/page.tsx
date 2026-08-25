@@ -56,7 +56,12 @@ export default function SignupPage() {
         >
           <div className="flex items-center justify-center">
             <Link href="/">
-              <Image src="/logo.png" alt="Logo" width={72} height={72} className="object-contain drop-shadow-lg cursor-pointer hover:scale-105 transition-transform" />
+              <motion.div 
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 2, repeat: 15, ease: "easeInOut" }}
+              >
+                <Image src="/logo.png" alt="Logo" width={72} height={72} className="object-contain drop-shadow-lg cursor-pointer hover:scale-105 transition-transform" />
+              </motion.div>
             </Link>
           </div>
         </motion.div>
