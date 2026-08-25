@@ -54,7 +54,7 @@ export async function loginTenant(formData: FormData) {
       }
     }
 
-    const pseudoEmail = `${targetPhone}.${resolvedScopeId}@locataire.ztefu.com`;
+    const pseudoEmail = `${targetPhone}.${resolvedScopeId}@locataire.mazeno.com`;
     
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
@@ -117,7 +117,7 @@ export async function loginTenant(formData: FormData) {
       }
     }
 
-    const pseudoEmail = `${targetPhone}.${resolvedScopeId}@locataire.ztefu.com`;
+    const pseudoEmail = `${targetPhone}.${resolvedScopeId}@locataire.mazeno.com`;
     
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({

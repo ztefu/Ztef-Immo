@@ -57,11 +57,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Cloisonnement basique (Basic Role Checking)
-  // On suppose que l'agence se connecte via /login avec un email (et non pas une adresse factice @locataire.ztefu.com)
-  // Les locataires se connectent via /portal (qui utilise @locataire.ztefu.com)
+  // On suppose que l'agence se connecte via /login avec un email (et non pas une adresse factice @locataire.mazeno.com)
+  // Les locataires se connectent via /portal (qui utilise @locataire.mazeno.com)
   if (user) {
-    const isTenantUser = user.email?.endsWith('@locataire.ztefu.com');
-    const isSuperAdmin = user.email === 'admin@ztefu-immo.com';
+    const isTenantUser = user.email?.endsWith('@locataire.mazeno.com');
+    const isSuperAdmin = user.email === 'admin@mazeno.com';
     const isAdminPath = request.nextUrl.pathname.startsWith('/admin');
     
     // Sécurité : Seul le super admin peut accéder à /admin

@@ -50,7 +50,7 @@ export default async function AdminDashboardPage() {
     <div className="flex flex-col gap-8 pb-20 sm:pb-0">
       <PageHeader 
         title="Vue d'ensemble Super Admin" 
-        description="Statistiques globales de la plateforme Ztefu-Immo."
+        description="Statistiques globales de la plateforme Mazeno."
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

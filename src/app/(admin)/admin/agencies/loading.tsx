@@ -5,7 +5,7 @@ export default function Loading() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title="Agences Partenaires"
-        description="Gérez les agences immobilières utilisant la plateforme Ztefu-Immo."
+        description="Gérez les agences immobilières utilisant la plateforme Mazeno."
       />
       
       <div className="bg-white rounded-[24px] p-2 sm:p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-100">

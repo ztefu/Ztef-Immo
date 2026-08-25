@@ -766,7 +766,7 @@ export async function addTenant(tenant: any) {
   }
   
   const cleanPhone = tenant.phone.replace(/\s+/g, '');
-  const pseudoEmail = `${cleanPhone}.${scopeId}@locataire.ztefu.com`;
+  const pseudoEmail = `${cleanPhone}.${scopeId}@locataire.mazeno.com`;
 
   const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
     email: pseudoEmail,

@@ -23,7 +23,8 @@ import {
   Building2,
   Home,
   Trees,
-  AlertTriangle
+  AlertTriangle,
+  MessageCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -98,11 +99,28 @@ const CustomPieTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-const AVAILABLE_PERIODS = ["Global", "Année 2026", "Août 2026", "Juillet 2026", "Juin 2026", "Mai 2026", "Avril 2026"];
+const generatePeriods = () => {
+  const periods = ["Global"];
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth(); // 0-11
+  
+  periods.push(`Année ${currentYear}`);
+  
+  const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+  
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(currentYear, currentMonth - i, 1);
+    periods.push(`${months[d.getMonth()]} ${d.getFullYear()}`);
+  }
+  return periods;
+};
+
+const AVAILABLE_PERIODS = generatePeriods();
 export default function DashboardPage() {
   const [propertySearch, setPropertySearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("Août 2026");
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(AVAILABLE_PERIODS[2]);
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -229,11 +247,13 @@ export default function DashboardPage() {
     return `${val > 0 ? '+' : ''}${val.toFixed(1)}%`;
   };
 
+  const allLateTenantsCount = tenants.filter(t => t.status === "En retard").length;
+
   const dynamicStats = {
-    logements: liveTotalUnits,
-    occupes: liveOccupiedUnits,
     encaisses: `${(liveEncaisses || 0).toLocaleString()} FCFA`,
     attente: `${(liveAttente || 0).toLocaleString()} FCFA`,
+    impayes: allLateTenantsCount,
+    tauxOccupation: liveTotalUnits > 0 ? Math.round((liveOccupiedUnits / liveTotalUnits) * 100) : 0,
   };
 
   const dynamicStatusData = [
@@ -243,19 +263,16 @@ export default function DashboardPage() {
   ];
 
   // Real dynamic Bar Chart logic
-  const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-  const dynamicRevenueData = months.map(m => {
-    // Map short month name to full month name as stored in MOCK_PAYMENTS
-    const fullNameMap: Record<string, string> = {
-      'Jan': 'Janvier 2026', 'Fév': 'Février 2026', 'Mar': 'Mars 2026',
-      'Avr': 'Avril 2026', 'Mai': 'Mai 2026', 'Juin': 'Juin 2026',
-      'Juil': 'Juillet 2026', 'Août': 'Août 2026', 'Sep': 'Septembre 2026',
-      'Oct': 'Octobre 2026', 'Nov': 'Novembre 2026', 'Déc': 'Décembre 2026'
-    };
-    const monthPayments = payments.filter(p => p.month === fullNameMap[m]);
+  const shortMonths = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+  const fullMonths = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+  
+  const currentYearForChart = new Date().getFullYear();
+  const dynamicRevenueData = shortMonths.map((shortMonth, index) => {
+    const fullName = `${fullMonths[index]} ${currentYearForChart}`;
+    const monthPayments = payments.filter(p => p.month === fullName);
     const encaisses = monthPayments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
     const attendu = monthPayments.reduce((sum, p) => sum + (p.amountDue || 0), 0);
-    return { name: m, encaisses, attendu };
+    return { name: shortMonth, encaisses, attendu };
   });
 
   // Widgets Data
@@ -341,33 +358,7 @@ export default function DashboardPage() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {/* Stat 1 */}
-        <div className="relative rounded-[24px] bg-white p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] flex flex-col justify-between overflow-hidden group min-h-[160px] hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.1)] transition-all duration-300">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-[#dcfce7] rounded-bl-[40px] pointer-events-none" />
-          <div className="absolute top-2 right-2 w-16 h-16 bg-slate-50 rounded-full pointer-events-none" />
-          <div className="absolute top-4 right-4 bg-white w-12 h-12 rounded-full flex items-center justify-center shadow-sm z-10 border border-slate-50">
-            <Building className="h-5 w-5 text-[#22c55e]" />
-          </div>
-
-          <div className="flex justify-between items-start z-10">
-            <div className="pr-16">
-              <p className="text-2xl sm:text-[32px] font-bold text-slate-900 leading-none truncate">{dynamicStats.logements}</p>
-              <p className="text-xs font-medium text-slate-500 mt-2">Logements gérés</p>
-            </div>
-          </div>
-          <div className="mt-8 flex items-end justify-between z-10">
-            <div className="flex items-center text-xs">
-              <span className="flex items-center text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-bold">
-                À ce jour
-              </span>
-            </div>
-            <svg width="60" height="30" viewBox="0 0 100 50" className="absolute bottom-4 right-4 opacity-80">
-              <path d="M10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#22c55e" strokeWidth="15" strokeLinecap="round" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Stat 2 */}
+        {/* Stat 1: Loyers Encaissés */}
         <div className="relative rounded-[24px] bg-white p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] flex flex-col justify-between overflow-hidden group min-h-[160px] hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.1)] transition-all duration-300">
           <div className="absolute top-0 right-0 w-20 h-20 bg-[#dbeafe] rounded-bl-[40px] pointer-events-none" />
           <div className="absolute top-2 right-2 w-16 h-16 bg-slate-50 rounded-full pointer-events-none" />
@@ -390,21 +381,17 @@ export default function DashboardPage() {
                 )}>
                   {encaissesGrowth >= 0 ? <ArrowUpRight className="mr-0.5 h-3 w-3" /> : <ArrowUpRight className="mr-0.5 h-3 w-3 rotate-90" />}
                   {formatGrowth(encaissesGrowth)}
-                </span>
-                <span className="text-slate-400 ml-1.5 font-medium">{growthLabel}</span>
+                 </span>
+                 <span className="text-slate-400 ml-1.5 font-medium">{growthLabel}</span>
               </div>
             )}
-            <div className="flex items-end gap-1 absolute bottom-4 right-4">
-              <div className="w-2 h-4 bg-blue-100 rounded-t-sm"></div>
-              <div className="w-2 h-6 bg-blue-200 rounded-t-sm"></div>
-              <div className="w-2 h-5 bg-blue-300 rounded-t-sm"></div>
-              <div className="w-2 h-8 bg-blue-400 rounded-t-sm"></div>
-              <div className="w-2 h-10 bg-blue-600 rounded-t-sm"></div>
-            </div>
+            <svg width="60" height="30" viewBox="0 0 100 50" className="absolute bottom-4 right-4 opacity-80">
+              <path d="M10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#3b82f6" strokeWidth="15" strokeLinecap="round" />
+            </svg>
           </div>
         </div>
 
-        {/* Stat 3 */}
+        {/* Stat 2: Loyers En Attente */}
         <div className="relative rounded-[24px] bg-white p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] flex flex-col justify-between overflow-hidden group min-h-[160px] hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.1)] transition-all duration-300">
           <div className="absolute top-0 right-0 w-20 h-20 bg-[#fef08a] rounded-bl-[40px] pointer-events-none" />
           <div className="absolute top-2 right-2 w-16 h-16 bg-slate-50 rounded-full pointer-events-none" />
@@ -439,18 +426,48 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Stat 4 */}
+        {/* Stat 3: Impayés */}
         <div className="relative rounded-[24px] bg-white p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] flex flex-col justify-between overflow-hidden group min-h-[160px] hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.1)] transition-all duration-300">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-[#f3e8ff] rounded-bl-[40px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-red-100 rounded-bl-[40px] pointer-events-none" />
           <div className="absolute top-2 right-2 w-16 h-16 bg-slate-50 rounded-full pointer-events-none" />
           <div className="absolute top-4 right-4 bg-white w-12 h-12 rounded-full flex items-center justify-center shadow-sm z-10 border border-slate-50">
-            <Users className="h-5 w-5 text-[#a855f7]" />
+            <AlertTriangle className="h-5 w-5 text-red-500" />
           </div>
 
           <div className="flex justify-between items-start z-10">
             <div className="pr-16">
-              <p className="text-2xl sm:text-[32px] font-bold text-slate-900 leading-none truncate">{dynamicStats.occupes}</p>
-              <p className="text-xs font-medium text-slate-500 mt-2">Logements occupés</p>
+              <p className="text-2xl sm:text-[32px] font-bold text-slate-900 leading-none truncate">{dynamicStats.impayes}</p>
+              <p className="text-xs font-medium text-slate-500 mt-2">Impayés (&gt; 1 mois)</p>
+            </div>
+          </div>
+          <div className="mt-8 flex items-end justify-between z-10">
+            <div className="flex items-center text-xs">
+              <span className="flex items-center text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-bold">
+                Retards actifs
+              </span>
+            </div>
+            <div className="flex items-end gap-1 absolute bottom-4 right-4">
+              <div className="w-2 h-4 bg-red-100 rounded-t-sm"></div>
+              <div className="w-2 h-6 bg-red-200 rounded-t-sm"></div>
+              <div className="w-2 h-5 bg-red-300 rounded-t-sm"></div>
+              <div className="w-2 h-8 bg-red-400 rounded-t-sm"></div>
+              <div className="w-2 h-10 bg-red-600 rounded-t-sm"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stat 4: Taux d'Occupation */}
+        <div className="relative rounded-[24px] bg-white p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] flex flex-col justify-between overflow-hidden group min-h-[160px] hover:-translate-y-1.5 hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.1)] transition-all duration-300">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[#dcfce7] rounded-bl-[40px] pointer-events-none" />
+          <div className="absolute top-2 right-2 w-16 h-16 bg-slate-50 rounded-full pointer-events-none" />
+          <div className="absolute top-4 right-4 bg-white w-12 h-12 rounded-full flex items-center justify-center shadow-sm z-10 border border-slate-50">
+            <Building className="h-5 w-5 text-[#22c55e]" />
+          </div>
+
+          <div className="flex justify-between items-start z-10">
+            <div className="pr-16">
+              <p className="text-2xl sm:text-[32px] font-bold text-slate-900 leading-none truncate">{dynamicStats.tauxOccupation}%</p>
+              <p className="text-xs font-medium text-slate-500 mt-2">Taux d'occupation</p>
             </div>
           </div>
           <div className="mt-8 flex items-end justify-between z-10">
@@ -459,14 +476,60 @@ export default function DashboardPage() {
                 À ce jour
               </span>
             </div>
-            <div className="flex items-center gap-1 absolute bottom-6 right-4">
-              <div className="w-1 h-3 bg-purple-300 rounded-full"></div>
-              <div className="w-1 h-6 bg-purple-400 rounded-full"></div>
-              <div className="w-1 h-10 bg-purple-600 rounded-full"></div>
-              <div className="w-1 h-5 bg-purple-400 rounded-full"></div>
-              <div className="w-1 h-8 bg-purple-500 rounded-full"></div>
-              <div className="w-1 h-4 bg-purple-300 rounded-full"></div>
+            <svg width="60" height="30" viewBox="0 0 100 50" className="absolute bottom-4 right-4 opacity-80">
+              <path d="M10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#22c55e" strokeWidth="15" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Bloc Encaissement du Mois */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.5, delay: 0.15 }}
+        className="bg-white rounded-[24px] p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-100 hover:-translate-y-1 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.08)] transition-all mb-5 mt-5"
+      >
+        <div className="flex flex-col md:flex-row justify-between md:items-end gap-6">
+          <div className="flex-1">
+            <h2 className="text-[17px] font-bold text-slate-900 mb-2">Encaissement de {selectedPeriod}</h2>
+            <div className="flex items-center gap-4 mb-4">
+              <div>
+                <span className="text-sm text-slate-500">Encaissé</span>
+                <p className="text-2xl font-bold text-emerald-600">{(liveEncaisses || 0).toLocaleString()} <span className="text-sm font-medium">FCFA</span></p>
+              </div>
+              <div className="h-10 w-px bg-slate-200"></div>
+              <div>
+                <span className="text-sm text-slate-500">Attendu</span>
+                <p className="text-2xl font-bold text-slate-900">{((liveEncaisses || 0) + (liveAttente || 0)).toLocaleString()} <span className="text-sm font-medium">FCFA</span></p>
+              </div>
             </div>
+            
+            {/* Progress Bar */}
+            <div className="w-full bg-slate-100 rounded-full h-3 mb-2 relative overflow-hidden">
+              <div 
+                className="bg-emerald-500 h-3 rounded-full transition-all duration-1000" 
+                style={{ width: `${((liveEncaisses || 0) + (liveAttente || 0)) > 0 ? Math.round(((liveEncaisses || 0) / ((liveEncaisses || 0) + (liveAttente || 0))) * 100) : 0}%` }}
+              ></div>
+            </div>
+            <p className="text-sm font-bold text-slate-700">
+              {((liveEncaisses || 0) + (liveAttente || 0)) > 0 ? Math.round(((liveEncaisses || 0) / ((liveEncaisses || 0) + (liveAttente || 0))) * 100) : 0}% <span className="font-normal text-slate-500">des loyers recouvrés ce mois</span>
+            </p>
+          </div>
+          
+          <div className="shrink-0 flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
+             <button 
+                disabled={(((liveEncaisses || 0) + (liveAttente || 0)) > 0 ? Math.round(((liveEncaisses || 0) / ((liveEncaisses || 0) + (liveAttente || 0))) * 100) : 0) === 100}
+                className="w-full sm:w-auto px-5 py-2.5 bg-slate-900 text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+             >
+                Saisir un paiement
+             </button>
+             <button 
+                disabled={(((liveEncaisses || 0) + (liveAttente || 0)) > 0 ? Math.round(((liveEncaisses || 0) / ((liveEncaisses || 0) + (liveAttente || 0))) * 100) : 0) === 100}
+                className="w-full sm:w-auto px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-full font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50"
+             >
+                <MessageCircle className="h-4 w-4 text-[#25D366]" /> Relancer
+             </button>
           </div>
         </div>
       </motion.div>

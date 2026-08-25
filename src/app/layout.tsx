@@ -7,8 +7,8 @@ import { APP_NAME } from "@/lib/config";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} Dashboard`,
-  description: "SaaS de Gestion Immobilière",
+  title: `${APP_NAME} - La gestion immobilière, simplement.`,
+  description: "La gestion immobilière, simplement.",
 };
 
 export default function RootLayout({

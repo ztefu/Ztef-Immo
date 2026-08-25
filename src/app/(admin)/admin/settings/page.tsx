@@ -107,7 +107,7 @@ function AdminSettingsContent() {
     <div className="w-full pb-32 sm:pb-0">
       <PageHeader
         title="Paramètres Administrateur"
-        description="Gérez le compte principal de la plateforme Ztefu-Immo."
+        description="Gérez le compte principal de la plateforme Mazeno."
         actions={
           <button 
             type="submit"

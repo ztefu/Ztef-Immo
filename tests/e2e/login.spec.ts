@@ -7,12 +7,12 @@ test.describe('Flux de Connexion', () => {
     await page.goto('/login');
     
     // 2. Vérifier que la page s'est bien chargée
-    await expect(page).toHaveTitle(/Ztefu-Immo/);
+    await expect(page).toHaveTitle(/Mazeno/);
     await expect(page.locator('h1')).toContainText('Se connecter');
     
     // 3. Remplir le formulaire
     // (Remplacez ces identifiants par ceux configurés dans votre environnement local)
-    await page.fill('input[type="email"]', 'test@ztefu-immo.com');
+    await page.fill('input[type="email"]', 'test@mazeno.com');
     await page.fill('input[type="password"]', 'password123');
     
     // 4. Soumettre le formulaire
@@ -29,7 +29,7 @@ test.describe('Flux de Connexion', () => {
   test('La validation du mot de passe fonctionne', async ({ page }) => {
     await page.goto('/login');
     
-    await page.fill('input[type="email"]', 'test@ztefu-immo.com');
+    await page.fill('input[type="email"]', 'test@mazeno.com');
     await page.fill('input[type="password"]', 'mauvaismotdepasse');
     await page.click('button[type="submit"]');
     

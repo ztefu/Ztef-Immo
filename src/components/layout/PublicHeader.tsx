@@ -15,16 +15,22 @@ export function PublicHeader() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Logo Ztefu-Immo" width={40} height={40} className="object-contain drop-shadow-sm" />
+            <Image src="/logo.png" alt="Logo Mazeno" width={40} height={40} className="object-contain drop-shadow-sm" />
             <span className="text-xl font-bold tracking-tight text-slate-900 hidden sm:block">
-              Ztefu-Immo
+              Mazeno
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-8">
+            <Link href="#personas" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+              Pour qui ?
+            </Link>
             <Link href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
               Fonctionnalités
+            </Link>
+            <Link href="#cycle-complet" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+              Avantages
             </Link>
             <Link href="#pricing" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
               Tarifs
@@ -76,11 +82,25 @@ export function PublicHeader() {
           >
             <div className="px-4 pt-2 pb-6 space-y-4 flex flex-col">
               <Link 
+                href="#personas" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl"
+              >
+                Pour qui ?
+              </Link>
+              <Link 
                 href="#features" 
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block px-3 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl"
               >
                 Fonctionnalités
+              </Link>
+              <Link 
+                href="#cycle-complet" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl"
+              >
+                Avantages
               </Link>
               <Link 
                 href="#pricing" 

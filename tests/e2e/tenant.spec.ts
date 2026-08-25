@@ -5,7 +5,7 @@ test.describe('Gestion des Locataires', () => {
   // On se connecte avant chaque test
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
-    await page.fill('input[type="email"]', 'test@ztefu-immo.com');
+    await page.fill('input[type="email"]', 'test@mazeno.com');
     await page.fill('input[type="password"]', 'password123');
     await page.click('button[type="submit"]');
     await expect(page).toHaveURL(/\/dashboard/);
