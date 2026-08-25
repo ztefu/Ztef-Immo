@@ -364,12 +364,12 @@ export default function RentPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsWhatsAppModalOpen(true)}
-              className="flex h-11 items-center justify-center rounded-full bg-[#25D366] text-white px-5 text-sm font-bold shadow-lg shadow-[#25D366]/20 hover:bg-[#1fa952] transition-colors whitespace-nowrap"
+              className="group flex h-11 items-center justify-center rounded-full bg-primary text-white border border-primary px-5 text-sm font-bold shadow-lg shadow-primary/20 hover:bg-transparent hover:text-primary transition-colors whitespace-nowrap"
             >
               <MessageCircle className="mr-2 h-4 w-4" />
               Relances Rapides
               {lateTenantsList.length > 0 && (
-                <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#25D366] text-xs">
+                <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-white text-primary text-xs group-hover:bg-primary group-hover:text-white transition-colors">
                   {lateTenantsList.length}
                 </span>
               )}
