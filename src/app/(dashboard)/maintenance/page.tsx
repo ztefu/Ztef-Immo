@@ -122,6 +122,21 @@ export default function MaintenancePage() {
     }
   };
 
+  const handleUpdateCost = async () => {
+    if (!selectedTicket || isSaving) return;
+    setIsSaving(true);
+    try {
+      await updateTicket(selectedTicket.id, { cost: selectedTicket.cost });
+      toast.success("Coût de l'intervention enregistré.");
+      refreshTickets();
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur lors de l'enregistrement du coût.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // --- Render Helpers ---
 
   const getPriorityBadge = (p: Ticket["priority"]) => {
@@ -414,6 +429,30 @@ export default function MaintenancePage() {
                       <p className="text-slate-500 text-xs font-medium">Créé le</p>
                       <p className="text-slate-900 font-semibold">{new Date(selectedTicket.createdAt).toLocaleDateString()}</p>
                     </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 pt-6 mb-6">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold text-slate-700">Coût de l'intervention (FCFA)</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="number"
+                        min="0"
+                        placeholder="Ex: 15000"
+                        value={selectedTicket.cost || ''}
+                        onChange={(e) => setSelectedTicket({ ...selectedTicket, cost: Number(e.target.value) })}
+                        className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-[12px] focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all text-sm font-medium"
+                      />
+                      <button 
+                        onClick={handleUpdateCost}
+                        disabled={isSaving}
+                        className="px-4 py-2.5 bg-slate-900 text-white rounded-[12px] text-sm font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 shrink-0"
+                      >
+                        Enregistrer
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1">Ce montant s'ajoutera automatiquement à vos rapports de dépenses.</p>
                   </div>
                 </div>
 

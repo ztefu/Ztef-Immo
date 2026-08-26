@@ -193,6 +193,8 @@ export default function DashboardPage() {
 
   const liveEncaisses = periodPayments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
   const liveAttente = periodPayments.reduce((sum, p) => sum + ((p.amountDue || 0) - (p.amountPaid || 0)), 0);
+  const totalLoyer = liveEncaisses + liveAttente;
+  const encaissePercent = totalLoyer > 0 ? (liveEncaisses / totalLoyer) * 100 : 0;
 
   // Dynamic calculations for previous period
   const getPreviousPeriod = (current: string) => {
@@ -424,7 +426,17 @@ export default function DashboardPage() {
               </div>
             )}
             <svg width="60" height="30" viewBox="0 0 100 50" className="absolute bottom-4 right-4 opacity-80">
-              <path d="M10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#3b82f6" strokeWidth="15" strokeLinecap="round" />
+              <path d="M10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#eff6ff" strokeWidth="15" strokeLinecap="round" />
+              <path 
+                d="M10 50 A 40 40 0 0 1 90 50" 
+                fill="none" 
+                stroke="#3b82f6" 
+                strokeWidth="15" 
+                strokeLinecap="round" 
+                strokeDasharray="126"
+                strokeDashoffset={126 - (126 * encaissePercent / 100)}
+                style={{ transition: "stroke-dashoffset 1.5s ease-out" }}
+              />
             </svg>
           </div>
         </div>
@@ -515,7 +527,17 @@ export default function DashboardPage() {
               </span>
             </div>
             <svg width="60" height="30" viewBox="0 0 100 50" className="absolute bottom-4 right-4 opacity-80">
-              <path d="M10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#22c55e" strokeWidth="15" strokeLinecap="round" />
+              <path d="M10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f0fdf4" strokeWidth="15" strokeLinecap="round" />
+              <path 
+                d="M10 50 A 40 40 0 0 1 90 50" 
+                fill="none" 
+                stroke="#22c55e" 
+                strokeWidth="15" 
+                strokeLinecap="round" 
+                strokeDasharray="126"
+                strokeDashoffset={126 - (126 * dynamicStats.tauxOccupation / 100)}
+                style={{ transition: "stroke-dashoffset 1.5s ease-out" }}
+              />
             </svg>
           </div>
         </div>

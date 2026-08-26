@@ -77,7 +77,12 @@ export function AppSidebar({
   const allNavItems = [
     ...filteredNavigation,
     ...locativeNav,
-    ...adminNav,
+    ...adminNav.map(item => {
+      if (item.name === "Gestion Déléguée" && isOwner) {
+        return { ...item, name: "Mes Délégations" };
+      }
+      return item;
+    }),
   ];
 
   const renderNavItems = (items: typeof allNavItems) => {
@@ -130,7 +135,7 @@ export function AppSidebar({
             </span>
           )}
           
-          {item.name === "Gestion Déléguée" && !isLoadingDelegations && pendingDelegationsCount > 0 && (
+          {(item.name === "Gestion Déléguée" || item.name === "Mes Délégations") && !isLoadingDelegations && pendingDelegationsCount > 0 && (
             <span className={cn(
               "bg-[#eab308] text-white font-bold rounded-full flex items-center justify-center transition-all",
               isExpanded 

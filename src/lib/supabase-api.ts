@@ -1364,14 +1364,23 @@ export async function getPendingDelegationsCount(): Promise<number> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return 0;
   const context = await getManagerContext(user.id);
-  if (!context || context.type !== 'agency') return 0;
+  if (!context) return 0;
 
   const adminClient = createAdminClient();
-  const { count, error } = await adminClient
+  let query = adminClient
     .from('property_delegations')
     .select('*', { count: 'exact', head: true })
-    .eq('agency_id', context.agencyId)
     .eq('status', 'En attente');
+    
+  if (context.type === 'agency') {
+    query = query.eq('agency_id', context.agencyId);
+  } else if (context.type === 'owner') {
+    query = query.eq('owner_id', context.ownerId);
+  } else {
+    return 0;
+  }
+
+  const { count, error } = await query;
   if (error) return 0;
   return count || 0;
 }
