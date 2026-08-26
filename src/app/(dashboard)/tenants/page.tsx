@@ -36,6 +36,7 @@ export default function TenantsPage() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
   const [idCardReference, setIdCardReference] = useState("");
   const [unitId, setUnitId] = useState(""); 
   const [rentAmount, setRentAmount] = useState(150000);
@@ -82,6 +83,7 @@ export default function TenantsPage() {
           fullName,
           phone,
           email,
+          address: address || "Non renseigné",
           idCardReference: idCardReference || "N/A",
           unitId,
           rentAmount: Number(rentAmount),
@@ -97,7 +99,7 @@ export default function TenantsPage() {
           fullName,
           phone,
           email,
-          address: "Non renseigné",
+          address: address || "Non renseigné",
           idCardReference: idCardReference || "N/A",
           unitId,
           entryDate: entryDate || new Date().toISOString().split('T')[0],
@@ -121,6 +123,7 @@ export default function TenantsPage() {
       setFullName("");
       setPhone("");
       setEmail("");
+      setAddress("");
       setIdCardReference("");
       setEntryDate("");
       setLeaseEndDate("");
@@ -138,6 +141,7 @@ export default function TenantsPage() {
     setFullName(tenant.fullName);
     setPhone(tenant.phone);
     setEmail(tenant.email);
+    setAddress(tenant.address || "");
     setIdCardReference(tenant.idCardReference || "");
     setUnitId(tenant.unitId || "");
     setRentAmount(tenant.rentAmount);
@@ -152,6 +156,7 @@ export default function TenantsPage() {
     setFullName("");
     setPhone("");
     setEmail("");
+    setAddress("");
     setIdCardReference("");
     const vacantUnits = units.filter(u => u.status === "Vacant");
     if (vacantUnits.length > 0) {
@@ -364,6 +369,18 @@ export default function TenantsPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full h-11 px-4 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Adresse</label>
+              <input 
+                type="text" 
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="w-full h-11 px-4 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
+                placeholder="Ex: Douala, Akwa"
               />
             </div>
             <div>

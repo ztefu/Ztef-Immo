@@ -41,6 +41,7 @@ export default function TenantDetailPage({ params }: { params: { id: string } })
   const [editFullName, setEditFullName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editEmail, setEditEmail] = useState("");
+  const [editAddress, setEditAddress] = useState("");
   const [paymentToAutoGenerate, setPaymentToAutoGenerate] = useState<Payment | null>(null);
   const [editIdCard, setEditIdCard] = useState("");
   const [editRent, setEditRent] = useState<number>(0);
@@ -65,6 +66,7 @@ export default function TenantDetailPage({ params }: { params: { id: string } })
       setEditFullName(t.fullName);
       setEditPhone(t.phone);
       setEditEmail(t.email);
+      setEditAddress(t.address || "");
       setEditIdCard(t.idCardReference || "");
       setEditRent(t.rentAmount);
       setEditEntryDate(t.entryDate || "");
@@ -134,6 +136,7 @@ export default function TenantDetailPage({ params }: { params: { id: string } })
         fullName: editFullName,
         phone: editPhone,
         email: editEmail,
+        address: editAddress,
       });
       
       setIsEditModalOpen(false);
@@ -574,6 +577,16 @@ export default function TenantDetailPage({ params }: { params: { id: string } })
                 className="w-full h-11 px-4 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
               />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Adresse physique</label>
+            <input 
+              type="text" 
+              value={editAddress}
+              onChange={(e) => setEditAddress(e.target.value)}
+              className="w-full h-11 px-4 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
+              placeholder="Ex: Quartier, Rue, Ville"
+            />
           </div>
           <div className="flex justify-end gap-3 mt-8">
             <button onClick={() => setIsEditModalOpen(false)} className="px-5 h-11 rounded-full text-slate-600 font-medium hover:bg-slate-100 transition-colors">

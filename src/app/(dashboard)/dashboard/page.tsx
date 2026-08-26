@@ -21,10 +21,11 @@ import {
   Info,
   Layers,
   Building2,
-  Home,
   Trees,
   AlertTriangle,
-  MessageCircle
+  MessageCircle,
+  Clock,
+  Home
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -123,6 +124,7 @@ export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>(AVAILABLE_PERIODS[2]);
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [randomExpiring, setRandomExpiring] = useState<any[]>([]);
 
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
@@ -278,6 +280,42 @@ export default function DashboardPage() {
   // Widgets Data
   const recentTickets = tickets.filter(t => t.status !== "Résolu").slice(0, 4);
   const lateTenants = tenants.filter(t => t.status === "En retard").slice(0, 4);
+
+  const parseFrenchDateToTime = (dateStr: string): number => {
+    if (!dateStr || dateStr === "Non défini") return NaN;
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) return d.getTime();
+    const parts = dateStr.trim().split(/\s+/);
+    if (parts.length >= 3) {
+      const day = parseInt(parts[0], 10);
+      const months: Record<string, number> = { 
+        "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5, 
+        "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11,
+        "Janvier": 0, "Février": 1, "Mars": 2, "Avril": 3, "Mai": 4, "Juin": 5, 
+        "Juillet": 6, "Août": 7, "Septembre": 8, "Octobre": 9, "Novembre": 10, "Décembre": 11
+      };
+      const month = months[parts[1]] !== undefined ? months[parts[1]] : 0;
+      const year = parseInt(parts[2], 10);
+      return new Date(year, month, day).getTime();
+    }
+    return NaN;
+  };
+
+  const expiringTenantsAll = tenants.filter(t => {
+    if (!t.leaseEndDate || t.leaseEndDate === "Non défini" || t.leaseStatus === "Ancien") return false;
+    const endDTime = parseFrenchDateToTime(t.leaseEndDate);
+    if (isNaN(endDTime)) return false;
+    const diffDays = Math.ceil((endDTime - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays <= 30;
+  });
+
+  useEffect(() => {
+    if (expiringTenantsAll.length > 0) {
+      setRandomExpiring([...expiringTenantsAll].sort(() => Math.random() - 0.5).slice(0, 5));
+    } else {
+      setRandomExpiring([]);
+    }
+  }, [tenants]);
 
 
   // Dynamically map properties to UI expected format
@@ -690,7 +728,7 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: 20 }} 
         animate={{ opacity: 1, y: 0 }} 
         transition={{ duration: 0.5, delay: 0.25 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-5"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-5"
       >
         {/* Tickets de Maintenance */}
         <div className="bg-white rounded-[24px] p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-100 hover:-translate-y-1 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.08)] transition-all">
@@ -759,6 +797,45 @@ export default function DashboardPage() {
               );
             }) : (
               <div className="text-sm text-slate-500 py-4 text-center">Aucun retard de paiement signalé.</div>
+            )}
+          </div>
+        </div>
+
+        {/* Fins de contrat proches */}
+        <div className="bg-white rounded-[24px] p-6 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-100 hover:-translate-y-1 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.08)] transition-all">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                <Clock className="h-4 w-4" />
+              </div>
+              <h3 className="font-bold text-slate-900 text-sm sm:text-lg whitespace-nowrap overflow-hidden text-ellipsis">Fins de Contrat</h3>
+            </div>
+            <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full">{expiringTenantsAll.length} {expiringTenantsAll.length > 1 ? 'alertes' : 'alerte'}</span>
+          </div>
+          <div className="flex flex-col gap-3">
+            {randomExpiring.length > 0 ? randomExpiring.map(tenant => {
+              const unit = units.find(u => u.id === tenant.unitId);
+              const endDTime = parseFrenchDateToTime(tenant.leaseEndDate!);
+              const diffDays = Math.ceil((endDTime - new Date().getTime()) / (1000 * 60 * 60 * 24));
+              
+              return (
+                <div key={tenant.id} onClick={() => window.location.href = '/leases'} className="p-3 bg-slate-50 border border-slate-100 rounded-[16px] flex justify-between items-center group cursor-pointer hover:border-orange-200 hover:bg-orange-50/50 transition-colors">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 group-hover:text-orange-700 transition-colors">{tenant.fullName}</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">{unit?.reference || 'Logement inconnu'}</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] uppercase font-bold px-2 py-1 rounded-full bg-orange-100 text-orange-600 inline-block mb-1">
+                      Expire bientôt
+                    </div>
+                    <div className="text-xs font-bold text-slate-700">
+                      {diffDays < 0 ? 'Expiré' : `Dans ${diffDays} jour${diffDays > 1 ? 's' : ''}`}
+                    </div>
+                  </div>
+                </div>
+              );
+            }) : (
+              <div className="text-sm text-slate-500 py-4 text-center">Aucun renouvellement imminent.</div>
             )}
           </div>
         </div>

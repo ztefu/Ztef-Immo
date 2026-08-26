@@ -1,18 +1,16 @@
 "use client";
 
-import { Search, Bell, Settings, Mic, User, LogOut, ChevronDown, Menu } from "lucide-react";
+import { Search, Settings, Mic, User, LogOut, ChevronDown, Menu } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAgency } from "@/hooks/useAgency";
-import { useNewTicketsCount } from "@/hooks/useNewTicketsCount";
 
 export function AppHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { agencyName, userName, isLoading, isOwner } = useAgency();
-  const { count: newTicketsCount, isLoadingCount } = useNewTicketsCount();
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
   const isSettingsActive = pathname.startsWith("/settings") || pathname.startsWith("/admin/settings");
@@ -64,17 +62,7 @@ export function AppHeader({ onMenuClick }: { onMenuClick?: () => void }) {
         </div>
         
         <div className="flex items-center gap-x-2 sm:gap-x-4 shrink-0">
-          <button type="button" className="relative flex items-center justify-center h-10 w-10 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
-            <span className="sr-only">Voir les notifications</span>
-            <Bell className="h-5 w-5" aria-hidden="true" />
-            {isLoadingCount ? (
-              <span className="absolute top-1.5 right-1.5 h-4 min-w-[16px] rounded-full bg-slate-200 animate-pulse border-2 border-white"></span>
-            ) : newTicketsCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 h-4 min-w-[16px] px-1 rounded-full bg-red-500 border-2 border-white text-[9px] font-bold text-white flex items-center justify-center">
-                {newTicketsCount > 99 ? '99+' : newTicketsCount}
-              </span>
-            )}
-          </button>
+
           
           <Link 
             href={settingsHref} 

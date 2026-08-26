@@ -12,9 +12,12 @@ import { PageHeaderSkeleton, TableSkeleton } from "@/components/ui/Skeletons";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { Modal } from "@/components/ui/Modal";
+import { DatePicker } from "@/components/ui/DatePicker";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { ContractTemplate } from "@/components/ui/ContractTemplate";
+import { AvenantTemplate } from "@/components/ui/AvenantTemplate";
 import { PDFPreviewModal } from "@/components/ui/PDFPreviewModal";
 import { useCurrentAgency } from "@/hooks/useCurrentAgency";
 
@@ -30,6 +33,12 @@ export default function LeasesPage() {
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const [pdfPreviewData, setPdfPreviewData] = useState<{ url: string, filename: string, title?: string } | null>(null);
   const { currentAgency } = useCurrentAgency();
+
+  // Renewal Modal State
+  const [renewalTenantId, setRenewalTenantId] = useState<string | null>(null);
+  const [newEndDate, setNewEndDate] = useState<string>("");
+  const [newRent, setNewRent] = useState<number | "">("");
+  const [isRenewing, setIsRenewing] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -60,6 +69,29 @@ export default function LeasesPage() {
     return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
+  const parseFrenchDateToTime = (dateStr: string): number => {
+    if (!dateStr || dateStr === "Non défini") return NaN;
+    // If it's already a standard format (e.g. 2026-08-15)
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) return d.getTime();
+    
+    // Fallback for French strings like "15 septembre 2026"
+    const parts = dateStr.trim().split(/\s+/);
+    if (parts.length >= 3) {
+      const day = parseInt(parts[0], 10);
+      const months: Record<string, number> = { 
+        "janvier": 0, "février": 1, "mars": 2, "avril": 3, "mai": 4, "juin": 5, 
+        "juillet": 6, "août": 7, "septembre": 8, "octobre": 9, "novembre": 10, "décembre": 11,
+        "Janvier": 0, "Février": 1, "Mars": 2, "Avril": 3, "Mai": 4, "Juin": 5, 
+        "Juillet": 6, "Août": 7, "Septembre": 8, "Octobre": 9, "Novembre": 10, "Décembre": 11
+      };
+      const month = months[parts[1]] !== undefined ? months[parts[1]] : 0;
+      const year = parseInt(parts[2], 10);
+      return new Date(year, month, day).getTime();
+    }
+    return NaN;
+  };
+
   // Enrich tenants data with property/unit info to form "Leases"
   const leases = tenants.map(tenant => {
     const unit = units.find(u => u.id === tenant.unitId);
@@ -68,16 +100,20 @@ export default function LeasesPage() {
     // Calculate if lease is expiring soon (less than 30 days)
     let isExpiringSoon = false;
     if (tenant.leaseEndDate && tenant.leaseEndDate !== "Non défini") {
-      const endD = new Date(tenant.leaseEndDate);
-      const now = new Date();
-      const diffTime = endD.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays <= 30 && diffDays >= 0) {
-        isExpiringSoon = true;
-      } else if (diffDays < 0) {
-        isExpiringSoon = true; // Already expired
+      const endDTime = parseFrenchDateToTime(tenant.leaseEndDate);
+      if (!isNaN(endDTime)) {
+        const now = new Date().getTime();
+        const diffTime = endDTime - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays <= 30 && diffDays >= 0) {
+          isExpiringSoon = true;
+        } else if (diffDays < 0) {
+          isExpiringSoon = true; // Already expired
+        }
       }
     }
+
+    const computedStatus = isExpiringSoon && tenant.leaseStatus !== "Ancien" ? "Expire bientôt" : (tenant.leaseStatus || "En attente");
 
     return {
       id: tenant.id,
@@ -89,6 +125,7 @@ export default function LeasesPage() {
       endDate: formatFrenchDate(tenant.leaseEndDate || "Non défini"),
       rent: tenant.rentAmount,
       status: tenant.leaseStatus || "En attente",
+      computedStatus,
       isExpiringSoon
     };
   });
@@ -102,6 +139,50 @@ export default function LeasesPage() {
     } catch (e) {
       console.error(e);
       toast.error("Erreur lors de la mise à jour", { id: "update-status" });
+    }
+  };
+
+  const handleRenewSubmit = async () => {
+    if (!renewalTenantId || !newEndDate) {
+      toast.error("Veuillez renseigner la nouvelle date de fin.");
+      return;
+    }
+    setIsRenewing(true);
+    try {
+      const updates: any = {
+        leaseEndDate: newEndDate,
+        leaseStatus: "Actif"
+      };
+      if (newRent !== "") {
+        updates.rentAmount = Number(newRent);
+      }
+      
+      await updateTenant(renewalTenantId, updates);
+      
+      setTenants(tenants.map(t => {
+        if (t.id === renewalTenantId) {
+          return {
+            ...t,
+            leaseEndDate: newEndDate,
+            leaseStatus: "Actif",
+            rentAmount: newRent !== "" ? Number(newRent) : t.rentAmount
+          };
+        }
+        return t;
+      }));
+      
+      toast.success("Le bail a été renouvelé avec succès !");
+      setRenewalTenantId(null);
+      // Wait a moment for state to update, then trigger addendum generation
+      setTimeout(() => {
+        generateAddendumPDF(renewalTenantId);
+      }, 500);
+      
+    } catch (e) {
+      console.error(e);
+      toast.error("Erreur lors du renouvellement");
+    } finally {
+      setIsRenewing(false);
     }
   };
 
@@ -158,6 +239,45 @@ export default function LeasesPage() {
     }
   };
 
+  const generateAddendumPDF = async (tenantId: string) => {
+    setIsDownloading(tenantId);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const template = document.getElementById(`avenant-pdf-template-${tenantId}`);
+      if (!template) {
+        throw new Error("Template d'avenant introuvable");
+      }
+
+      const canvas = await html2canvas(template, {
+        scale: 2,
+        useCORS: true,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [794, 1123]
+      });
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, 794, 1123);
+      const pdfDataUri = pdf.output('datauristring');
+      
+      // Upload could go here in future if we want to store addendums
+      // const url = await uploadContractAction(tenantId + "_avenant", pdfDataUri);
+      
+      const tenant = tenants.find(t => t.id === tenantId);
+      const filename = `Avenant_Renouvellement_${tenant?.fullName.replace(/\s+/g, '_') || "Locataire"}.pdf`;
+      setPdfPreviewData({ url: pdfDataUri, filename, title: "Avenant généré avec succès" });
+      
+    } catch (error) {
+      console.error("Avenant PDF generation failed", error);
+      toast.error("Erreur lors de la génération de l'avenant");
+    } finally {
+      setIsDownloading(null);
+    }
+  };
+
   const columns = [
     {
       header: "Locataire",
@@ -203,15 +323,17 @@ export default function LeasesPage() {
     {
       header: "Statut",
       cell: (item: any) => {
-        const isDraft = item.status === "Brouillon" || item.status === "En attente";
-        const isActive = item.status === "Actif";
+        const isDraft = item.computedStatus === "Brouillon" || item.computedStatus === "En attente";
+        const isActive = item.computedStatus === "Actif";
+        const isExpiring = item.computedStatus === "Expire bientôt";
         return (
           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
             isDraft ? "bg-yellow-100 text-yellow-700" :
             isActive ? "bg-green-100 text-green-700" :
+            isExpiring ? "bg-orange-100 text-orange-700" :
             "bg-slate-100 text-slate-700"
           }`}>
-            {isDraft ? "En attente" : item.status}
+            {item.computedStatus}
           </span>
         );
       }
@@ -220,7 +342,7 @@ export default function LeasesPage() {
       header: "Actions",
       cell: (item: any) => (
         <div className="flex justify-end gap-2 items-center">
-          {(item.status === "Brouillon" || item.status === "En attente") && (
+          {item.computedStatus === "En attente" && (
             <button 
               onClick={() => handleUpdateStatus(item.id, "Actif")}
               className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold hover:bg-green-200 transition-colors"
@@ -228,7 +350,19 @@ export default function LeasesPage() {
               Signer
             </button>
           )}
-          {item.status === "Actif" && (
+          {item.computedStatus === "Expire bientôt" && (
+            <button 
+              onClick={() => {
+                setRenewalTenantId(item.id);
+                setNewEndDate("");
+                setNewRent("");
+              }}
+              className="px-3 py-1 bg-orange-100 text-orange-700 border border-orange-200 rounded-full text-xs font-bold hover:bg-orange-200 transition-colors"
+            >
+              Renouveler
+            </button>
+          )}
+          {item.computedStatus === "Actif" && (
             <button 
               onClick={() => {
                 if(confirm("Voulez-vous vraiment terminer ce bail ? Le logement sera libéré.")) {
@@ -392,11 +526,22 @@ export default function LeasesPage() {
           
           return (
             <div key={`template-wrapper-${tenant.id}`}>
+               {/* Contrat principal (pour le bouton Télécharger) */}
                <ContractTemplate 
                  tenant={tenant} 
                  unit={unit || null} 
                  agency={currentAgency}
                  property={property || null}
+               />
+               
+               {/* Avenant (pour le bouton Renouveler) */}
+               <AvenantTemplate
+                 tenant={tenant}
+                 unit={unit || null}
+                 agency={currentAgency}
+                 property={property || null}
+                 newEndDate={tenant.leaseEndDate || ""}
+                 newRent={tenant.rentAmount}
                />
             </div>
           );
@@ -408,8 +553,51 @@ export default function LeasesPage() {
         onClose={() => setPdfPreviewData(null)}
         pdfUrl={pdfPreviewData?.url || null}
         fileName={pdfPreviewData?.filename}
-        title="Aperçu du Contrat de Bail"
+        title={pdfPreviewData?.title || "Aperçu du Document"}
       />
+
+      <Modal isOpen={!!renewalTenantId} onClose={() => setRenewalTenantId(null)} title="Renouveler le Bail">
+        {renewalTenantId && (
+          <div className="flex flex-col gap-4">
+            <div className="p-4 bg-orange-50 rounded-xl border border-orange-100">
+              <p className="text-sm text-orange-800 font-medium mb-1">
+                Le bail de <strong>{leases.find(l => l.id === renewalTenantId)?.tenantName}</strong> arrive à échéance.
+              </p>
+              <p className="text-xs text-orange-600">
+                Loyer actuel : <strong>{leases.find(l => l.id === renewalTenantId)?.rent?.toLocaleString()} FCFA</strong>
+              </p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Nouvelle date de fin <span className="text-red-500">*</span></label>
+              <DatePicker 
+                value={newEndDate}
+                onChange={setNewEndDate}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Nouveau loyer mensuel (FCFA) - <span className="text-slate-400 italic">Optionnel</span></label>
+              <input 
+                type="number" 
+                value={newRent}
+                onChange={(e) => setNewRent(e.target.value ? Number(e.target.value) : "")}
+                placeholder={`Ex: ${leases.find(l => l.id === renewalTenantId)?.rent}`}
+                className="w-full h-11 px-4 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
+              />
+              <p className="text-xs text-slate-500 mt-1">Laissez vide si le loyer reste inchangé.</p>
+            </div>
+
+            <button 
+              onClick={handleRenewSubmit}
+              disabled={isRenewing}
+              className="w-full h-11 mt-4 rounded-full bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isRenewing ? "Enregistrement..." : "Renouveler et générer l'avenant"}
+            </button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

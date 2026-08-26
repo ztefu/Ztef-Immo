@@ -26,6 +26,7 @@ import {
 import { useCurrentAgency } from "@/hooks/useCurrentAgency";
 import { useNewTicketsCount } from "@/hooks/useNewTicketsCount";
 import { usePendingDelegationsCount } from "@/hooks/useDelegations";
+import { useExpiringLeasesCount } from "@/hooks/useExpiringLeasesCount";
 import { APP_NAME } from "@/lib/config";
 
 const navigation = [
@@ -61,6 +62,7 @@ export function AppSidebar({
   const pathname = usePathname();
   const { count: newTicketsCount, isLoadingCount } = useNewTicketsCount();
   const { count: pendingDelegationsCount, isLoading: isLoadingDelegations } = usePendingDelegationsCount();
+  const { count: expiringLeasesCount, isLoadingCount: isLoadingExpiring } = useExpiringLeasesCount();
   const { currentAgency, isLoadingAgency } = useCurrentAgency();
 
   const agencyName = currentAgency?.name || APP_NAME;
@@ -136,6 +138,24 @@ export function AppSidebar({
                 : "absolute top-1 right-1 h-4 min-w-[16px] px-1 text-[9px] border-2 border-white shadow-sm"
             )}>
               {pendingDelegationsCount > 99 ? '99+' : pendingDelegationsCount}
+            </span>
+          )}
+
+          {item.name === "Contrats de Bail" && isLoadingExpiring ? (
+            <span className={cn(
+              "bg-slate-200 animate-pulse rounded-full flex items-center justify-center transition-all",
+              isExpanded 
+                ? "h-5 min-w-[20px] ml-auto" 
+                : "absolute top-1 right-1 h-4 min-w-[16px] border-2 border-white shadow-sm"
+            )}></span>
+          ) : item.name === "Contrats de Bail" && expiringLeasesCount > 0 && (
+            <span className={cn(
+              "bg-orange-500 text-white font-bold rounded-full flex items-center justify-center transition-all",
+              isExpanded 
+                ? "h-5 min-w-[20px] px-1.5 text-[10px] ml-auto" 
+                : "absolute top-1 right-1 h-4 min-w-[16px] px-1 text-[9px] border-2 border-white shadow-sm"
+            )}>
+              {expiringLeasesCount > 99 ? '99+' : expiringLeasesCount}
             </span>
           )}
         </Link>
