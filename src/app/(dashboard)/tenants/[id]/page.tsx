@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/ui/PageHeader";
-import { ArrowLeft, User, Phone, Mail, MapPin, FileText, Wallet, Calendar, Download, AlertTriangle } from "lucide-react";
+import { ArrowLeft, User, Phone, Mail, MapPin, FileText, Wallet, Calendar, Download, AlertTriangle, Key } from "lucide-react";
 import { motion } from "framer-motion";
 import { Tenant, Unit, Property, Payment } from "@/lib/mock-data";
 import { addPayment, updateTenant } from "@/lib/supabase-api";
@@ -401,6 +401,10 @@ export default function TenantDetailPage({ params }: { params: { id: string } })
               <div className="flex items-center text-sm mt-2 p-3 bg-slate-50 rounded-xl">
                 <FileText className="h-4 w-4 text-slate-400 mr-3" />
                 <span className="font-medium text-slate-500 text-xs">CNI: {tenant.idCardReference}</span>
+              </div>
+              <div className="flex items-center text-sm mt-2 p-3 bg-purple-50 border border-purple-100 rounded-xl">
+                <Key className="h-4 w-4 text-purple-500 mr-3" />
+                <span className="font-medium text-purple-700 text-xs">Code Accès Locataire : <span className="font-bold select-all">{tenant.accessCode || "Généré automatiquement (Ancien format)"}</span></span>
               </div>
             </div>
           </motion.div>

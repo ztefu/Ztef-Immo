@@ -143,17 +143,7 @@ export async function updateAgency(id: string, updates: any) {
   const { data, error } = await adminClient.from('agencies').update(dbUpdates).eq('id', id).select().single();
   if (error) throw error;
   
-  if (updates.tenantAccessCode !== undefined) {
-    const { data: tenants } = await adminClient.from('tenants').select('auth_id').eq('agency_id', id).not('auth_id', 'is', null);
-    if (tenants && tenants.length > 0) {
-      for (const t of tenants) {
-        if (t.auth_id) {
-          const { error: authError } = await adminClient.auth.admin.updateUserById(t.auth_id, { password: updates.tenantAccessCode });
-          if (authError) console.error("Erreur mise à jour mot de passe locataire (Agence):", authError);
-        }
-      }
-    }
-  }
+  // Mass password updates have been removed since each tenant now has a unique access code.
 
   revalidatePath('/', 'layout');
   return mapAgency(data);
@@ -353,6 +343,7 @@ function mapTenant(db: any): Tenant {
     agencyId: db.agency_id,
     authId: db.auth_id,
     contractUrl: db.contract_url,
+    accessCode: db.access_code,
   };
 }
 
@@ -757,14 +748,7 @@ export async function addTenant(tenant: any) {
   const agencyId = context.type === 'agency' ? context.agencyId : null;
   const scopeId = context.type === 'agency' ? context.agencyId : context.ownerId;
   
-  let accessCode = 'Locat@12345';
-  if (context.type === 'agency') {
-    const { data: agency } = await adminClient.from('agencies').select('tenant_access_code').eq('id', context.agencyId).single();
-    if (agency?.tenant_access_code) accessCode = agency.tenant_access_code;
-  } else {
-    const { data: owner } = await adminClient.from('owners').select('tenant_access_code').eq('id', context.ownerId).single();
-    if (owner?.tenant_access_code) accessCode = owner.tenant_access_code;
-  }
+  const accessCode = crypto.randomUUID().slice(0, 8);
   
   const cleanPhone = tenant.phone.replace(/\s+/g, '');
   const pseudoEmail = `${cleanPhone}.${scopeId}@locataire.mazeno.com`;
@@ -798,6 +782,7 @@ export async function addTenant(tenant: any) {
     status: tenant.status,
     auth_id: authData?.user?.id, // Link the tenant to the auth user
     agency_id: agencyId,
+    access_code: accessCode, // Save the generated password
   };
   const { data, error } = await supabase.from('tenants').insert([dbTenant]).select().single();
   if (error) {
@@ -1004,25 +989,7 @@ export async function updateOwner(id: string, updates: any) {
   const { data, error } = await adminClient.from('owners').update(dbUpdates).eq('id', id).select().single();
   if (error) throw error;
 
-  if (updates.tenantAccessCode !== undefined) {
-    const { data: properties } = await adminClient.from('properties').select('id').eq('owner_id', id);
-    const propertyIds = properties?.map(p => p.id) || [];
-    if (propertyIds.length > 0) {
-      const { data: units } = await adminClient.from('units').select('id').in('property_id', propertyIds);
-      const unitIds = units?.map(u => u.id) || [];
-      if (unitIds.length > 0) {
-        const { data: tenants } = await adminClient.from('tenants').select('auth_id').in('unit_id', unitIds).not('auth_id', 'is', null);
-        if (tenants && tenants.length > 0) {
-          for (const t of tenants) {
-            if (t.auth_id) {
-              const { error: authError } = await adminClient.auth.admin.updateUserById(t.auth_id, { password: updates.tenantAccessCode });
-              if (authError) console.error("Erreur mise à jour mot de passe locataire (Propriétaire):", authError);
-            }
-          }
-        }
-      }
-    }
-  }
+  // Mass password updates have been removed since each tenant now has a unique access code.
 
   return mapOwner(data);
 }

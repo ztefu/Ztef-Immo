@@ -37,12 +37,9 @@ export async function updateSession(request: NextRequest) {
   
   const isAuthPath = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup') || request.nextUrl.pathname === '/portal'
   
-  if (
-    !user &&
-    !isAuthPath &&
-    !request.nextUrl.pathname.startsWith('/api') &&
-    request.nextUrl.pathname !== '/'
-  ) {
+  const isPublicPath = request.nextUrl.pathname === '/' || isAuthPath
+
+  if (!user && !isPublicPath) {
     // If not authenticated and trying to access a protected route (e.g. /dashboard)
     if (request.nextUrl.pathname.startsWith('/portal')) {
       const url = request.nextUrl.clone()

@@ -102,6 +102,7 @@ export interface Tenant {
   agencyId?: string;
   authId?: string;
   contractUrl?: string;
+  accessCode?: string;
 }
 
 export interface Ticket {
