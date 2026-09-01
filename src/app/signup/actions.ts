@@ -82,7 +82,7 @@ export async function signup(formData: FormData) {
   }
 
   // 4. Log the user in with the standard client
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signInWithPassword({
     email,
     password,

@@ -64,7 +64,7 @@ export async function loginTenant(formData: FormData) {
 
     const pseudoEmail = `${targetPhone}.${resolvedScopeId}@locataire.mazeno.com`;
     
-    const supabase = createClient();
+    const supabase = await createClient();
     const { error } = await supabase.auth.signInWithPassword({
       email: pseudoEmail,
       password: code,
@@ -127,7 +127,7 @@ export async function loginTenant(formData: FormData) {
 
     const pseudoEmail = `${targetPhone}.${resolvedScopeId}@locataire.mazeno.com`;
     
-    const supabase = createClient();
+    const supabase = await createClient();
     const { error } = await supabase.auth.signInWithPassword({
       email: pseudoEmail,
       password: code,
@@ -146,7 +146,7 @@ export async function loginTenant(formData: FormData) {
 
 
 export async function debugTenantSession() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'No user' };
   const adminClient = createAdminClient();

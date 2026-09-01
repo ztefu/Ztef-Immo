@@ -4,7 +4,7 @@ import { createAdminClient, createClient } from '@/utils/supabase/server';
 
 export async function uploadContractAction(tenantId: string, base64Pdf: string): Promise<string | null> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: authCheck } = await supabase.from('tenants').select('id').eq('id', tenantId).single();
     if (!authCheck) {
       console.error('Unauthorized upload attempt for tenant:', tenantId);
@@ -56,7 +56,7 @@ export async function uploadContractAction(tenantId: string, base64Pdf: string):
 
 export async function uploadReceiptAction(paymentId: string, base64Pdf: string): Promise<string | null> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: authCheck } = await supabase.from('payments').select('id').eq('id', paymentId).single();
     if (!authCheck) {
       console.error('Unauthorized upload attempt for payment:', paymentId);

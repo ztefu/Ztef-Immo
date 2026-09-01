@@ -14,7 +14,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Disabled in production' }, { status: 403 });
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Mapping old string IDs to new UUIDs
   const idMap = new Map<string, string>();

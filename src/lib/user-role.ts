@@ -18,7 +18,7 @@ export async function getUserRole(providedUserId?: string): Promise<UserRole> {
   let userId = providedUserId;
 
   if (!userId) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     userId = user?.id;
   }

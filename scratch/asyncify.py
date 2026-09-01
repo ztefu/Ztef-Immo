@@ -1,22 +1,40 @@
 import os
 import re
 
-def asyncify_create_client(directory):
-    for root, dirs, files in os.walk(directory):
+def asyncify_supabase():
+    # 1. Update src/utils/supabase/server.ts
+    server_ts_path = 'src/utils/supabase/server.ts'
+    with open(server_ts_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+        
+    content = content.replace('export function createClient() {', 'export async function createClient() {')
+    content = content.replace('const cookieStore = cookies()', 'const cookieStore = await cookies()')
+    
+    with open(server_ts_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+        
+    # 2. Update all references in src/
+    for root, _, files in os.walk('src'):
         for file in files:
-            if file.endswith(('.ts', '.tsx')):
-                filepath = os.path.join(root, file)
-                with open(filepath, 'r', encoding='utf-8') as f:
+            if file.endswith('.ts') or file.endswith('.tsx'):
+                path = os.path.join(root, file)
+                with open(path, 'r', encoding='utf-8') as f:
                     content = f.read()
-
-                if 'createClient(' in content and 'import ' in content and 'supabase' in content:
-                    # We need to change `const supabase = createClient()` to `const supabase = await createClient()`
-                    # but only for createClient() from @/utils/supabase/server or client
-                    if 'createClient' in content:
-                        new_content = re.sub(r'([^\w])createClient\(\)', r'\1await createClient()', content)
-                        if new_content != content:
-                            with open(filepath, 'w', encoding='utf-8') as f:
-                                f.write(new_content)
-                            print(f"Updated {filepath}")
-
-asyncify_create_client('src')
+                    
+                if 'createClient()' in content and path != server_ts_path:
+                    # Replace createClient() with await createClient()
+                    # But we must only replace it if it's imported from server
+                    # For simplicity, since createClient is usually from server in server actions,
+                    # wait, what if it's from client.ts?
+                    # client.ts createClient is NOT async.
+                    # We can check the import.
+                    if 'utils/supabase/server' in content:
+                        content = re.sub(r'(?<!await )createClient\(\)', 'await createClient()', content)
+                        
+                        # We also need to make sure the enclosing function is async.
+                        # This is a bit complex for regex.
+                        with open(path, 'w', encoding='utf-8') as f:
+                            f.write(content)
+                            
+asyncify_supabase()
+print("Asyncify done.")
