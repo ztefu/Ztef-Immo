@@ -3,6 +3,9 @@ import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { APP_NAME } from "@/lib/config";
+import { validateEnv } from "@/lib/env";
+
+validateEnv();
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 

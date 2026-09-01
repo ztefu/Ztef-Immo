@@ -10,6 +10,10 @@ import {
 } from '@/lib/mock-data';
 
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Disabled in production' }, { status: 403 });
+  }
+
   const supabase = createClient();
 
   // Mapping old string IDs to new UUIDs
@@ -179,6 +183,6 @@ export async function GET() {
     return NextResponse.json({ success: true, message: 'Data seeded successfully!' });
   } catch (error: any) {
     console.error('Error seeding data:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Une erreur interne est survenue.' }, { status: 500 });
   }
 }
