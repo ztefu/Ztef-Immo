@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { 
 
   Building, 
@@ -192,7 +193,20 @@ export default function DashboardPage() {
     : payments.filter(p => p.month === selectedPeriod);
 
   const liveEncaisses = periodPayments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
-  const liveAttente = periodPayments.reduce((sum, p) => sum + ((p.amountDue || 0) - (p.amountPaid || 0)), 0);
+  
+  // Loyer attendu théorique (basé sur les locataires actifs actuels)
+  const baseExpectedRent = units.filter(u => u.status === "Occupé").reduce((sum, u) => sum + (u.rent || 0), 0);
+  
+  let liveAttente = 0;
+  if (selectedPeriod !== "Global" && !selectedPeriod.startsWith("Année")) {
+    const generatedDue = periodPayments.reduce((sum, p) => sum + (p.amountDue || 0), 0);
+    const missingDue = Math.max(0, baseExpectedRent - generatedDue); // loyers non encore facturés
+    const existingAttente = periodPayments.reduce((sum, p) => sum + ((p.amountDue || 0) - (p.amountPaid || 0)), 0);
+    liveAttente = existingAttente + missingDue;
+  } else {
+    liveAttente = periodPayments.reduce((sum, p) => sum + ((p.amountDue || 0) - (p.amountPaid || 0)), 0);
+  }
+
   const totalLoyer = liveEncaisses + liveAttente;
   const encaissePercent = totalLoyer > 0 ? (liveEncaisses / totalLoyer) * 100 : 0;
 
@@ -578,18 +592,22 @@ export default function DashboardPage() {
           </div>
           
           <div className="shrink-0 flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
-             <button 
-                disabled={(((liveEncaisses || 0) + (liveAttente || 0)) > 0 ? Math.round(((liveEncaisses || 0) / ((liveEncaisses || 0) + (liveAttente || 0))) * 100) : 0) === 100}
-                className="w-full sm:w-auto px-5 py-2.5 bg-slate-900 text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-             >
-                Saisir un paiement
-             </button>
-             <button 
-                disabled={(((liveEncaisses || 0) + (liveAttente || 0)) > 0 ? Math.round(((liveEncaisses || 0) / ((liveEncaisses || 0) + (liveAttente || 0))) * 100) : 0) === 100}
-                className="w-full sm:w-auto px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-full font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50"
-             >
-                <MessageCircle className="h-4 w-4 text-[#25D366]" /> Relancer
-             </button>
+             <Link href="/rent" className="w-full sm:w-auto">
+               <button 
+                  disabled={(((liveEncaisses || 0) + (liveAttente || 0)) > 0 ? Math.round(((liveEncaisses || 0) / ((liveEncaisses || 0) + (liveAttente || 0))) * 100) : 0) === 100}
+                  className="w-full px-5 py-2.5 bg-slate-900 text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+               >
+                  Saisir un paiement
+               </button>
+             </Link>
+             <Link href="/rent" className="w-full sm:w-auto">
+               <button 
+                  disabled={(((liveEncaisses || 0) + (liveAttente || 0)) > 0 ? Math.round(((liveEncaisses || 0) / ((liveEncaisses || 0) + (liveAttente || 0))) * 100) : 0) === 100}
+                  className="w-full px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-full font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50"
+               >
+                  <MessageCircle className="h-4 w-4 text-[#25D366]" /> Relancer
+               </button>
+             </Link>
           </div>
         </div>
       </motion.div>

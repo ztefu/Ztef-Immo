@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Plus, Search, Filter, Wallet, TrendingUp, AlertCircle, Download, CheckCircle2, MessageCircle } from "lucide-react";
+import { Plus, Search, Filter, Wallet, TrendingUp, AlertCircle, Download, CheckCircle2, MessageCircle, Calendar, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { Payment, Tenant } from "@/lib/mock-data";
 import { getPayments, getTenants, addPayment, getUnits, getProperties, getOwners } from "@/lib/supabase-api";
@@ -20,10 +20,31 @@ import { PDFPreviewModal } from "@/components/ui/PDFPreviewModal";
 import { WhatsAppBatchModal } from "@/components/ui/WhatsAppBatchModal";
 import { useCurrentAgency } from "@/hooks/useCurrentAgency";
 
+const generatePeriods = () => {
+  const periods = ["Global"];
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth(); // 0-11
+  
+  periods.push(`Année ${currentYear}`);
+  
+  const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+  
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(currentYear, currentMonth - i, 1);
+    periods.push(`${months[d.getMonth()]} ${d.getFullYear()}`);
+  }
+  return periods;
+};
+
+const AVAILABLE_PERIODS = generatePeriods();
+
 export default function RentPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(AVAILABLE_PERIODS[2]);
+  const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const { currentAgency } = useCurrentAgency();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -69,8 +90,14 @@ export default function RentPage() {
   const baseRent = selectedTenant ? selectedTenant.rentAmount : 0;
   const amountDue = baseRent * numberOfMonths;
 
+  const periodPayments = selectedPeriod === "Global"
+    ? payments
+    : selectedPeriod.startsWith("Année")
+    ? payments.filter(p => p.month.includes(selectedPeriod.split(" ")[1]))
+    : payments.filter(p => p.month === selectedPeriod);
+
   // Filter payments
-  const enrichedPayments = payments.map(payment => {
+  const enrichedPayments = periodPayments.map(payment => {
     const tenant = tenants.find(t => t.id === payment.tenantId);
     return {
       ...payment,
@@ -95,7 +122,7 @@ export default function RentPage() {
 
   // Commission Calculation
   let totalCommission = 0;
-  payments.forEach(payment => {
+  periodPayments.forEach(payment => {
     if (payment.amountPaid) {
       const tenant = tenants.find(t => t.id === payment.tenantId);
       if (tenant) {
@@ -360,6 +387,33 @@ export default function RentPage() {
         description="Suivi des encaissements et génération des quittances"
         actions={
           <div className="hidden sm:flex items-center gap-3">
+            <div className="relative z-50">
+              <div 
+                onClick={() => setIsPeriodDropdownOpen(!isPeriodDropdownOpen)}
+                className="flex items-center bg-white rounded-full px-4 h-11 border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors"
+              >
+                <Calendar className="h-4 w-4 text-slate-500 mr-2" />
+                <span className="text-sm font-medium text-slate-700 mr-2 whitespace-nowrap">{selectedPeriod}</span>
+                <ChevronDown className="h-4 w-4 text-slate-500" />
+              </div>
+              
+              {isPeriodDropdownOpen && (
+                <div className="absolute top-12 right-0 w-full min-w-[150px] bg-white rounded-xl shadow-lg border border-slate-100 py-2">
+                  {AVAILABLE_PERIODS.map((period) => (
+                    <button
+                      key={period}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                      onClick={() => {
+                        setSelectedPeriod(period);
+                        setIsPeriodDropdownOpen(false);
+                      }}
+                    >
+                      {period}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

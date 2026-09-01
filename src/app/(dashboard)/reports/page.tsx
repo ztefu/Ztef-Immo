@@ -17,10 +17,27 @@ import { PageHeaderSkeleton, StatCardSkeleton, TableSkeleton } from "@/component
 import { PDFPreviewModal } from "@/components/ui/PDFPreviewModal";
 import { APP_NAME } from "@/lib/config";
 
-const AVAILABLE_PERIODS = ["Global", "Année 2026", "Août 2026", "Juillet 2026", "Juin 2026", "Mai 2026", "Avril 2026"];
+const generatePeriods = () => {
+  const periods = ["Global"];
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth(); // 0-11
+  
+  periods.push(`Année ${currentYear}`);
+  
+  const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+  
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(currentYear, currentMonth - i, 1);
+    periods.push(`${months[d.getMonth()]} ${d.getFullYear()}`);
+  }
+  return periods;
+};
+
+const AVAILABLE_PERIODS = generatePeriods();
 
 export default function ReportsPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("Global");
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(AVAILABLE_PERIODS[2]);
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
 
   const { payments, isLoading: isPaymentsLoading } = usePayments();
