@@ -13,7 +13,8 @@ export async function toggleAgencyStatus(agencyId: string, currentStatus: string
     .eq("id", agencyId);
     
   if (error) {
-    throw new Error(error.message);
+    console.error(error);
+    throw new Error("Une erreur interne est survenue.");
   }
   
   revalidatePath("/admin/agencies");
@@ -31,7 +32,8 @@ export async function toggleOwnerStatus(ownerId: string, currentStatus: string) 
     .eq("id", ownerId);
     
   if (error) {
-    throw new Error(error.message);
+    console.error(error);
+    throw new Error("Une erreur interne est survenue.");
   }
   
   revalidatePath("/admin/owners");

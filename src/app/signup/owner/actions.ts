@@ -2,12 +2,20 @@
 
 import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { signupRateLimiter } from "@/lib/rate-limit";
 
 function generateSlug(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 }
 
 export async function signupOwner(formData: FormData) {
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for") || "unknown";
+  if (!signupRateLimiter.check(ip)) {
+    return { error: "Trop de tentatives d'inscription. Veuillez réessayer plus tard." };
+  }
+
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const fullName = formData.get("fullName") as string;

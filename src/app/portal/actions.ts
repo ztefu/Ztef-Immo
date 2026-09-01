@@ -3,8 +3,16 @@
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { loginRateLimiter } from "@/lib/rate-limit";
 
 export async function loginTenant(formData: FormData) {
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for") || "unknown";
+  if (!loginRateLimiter.check(ip)) {
+    return { error: "Trop de tentatives de connexion. Veuillez réessayer plus tard." };
+  }
+
   const phone = formData.get("phone") as string;
   const code = formData.get("code") as string;
   const scopeType = formData.get("scopeType") as string; // "agency" or "owner"

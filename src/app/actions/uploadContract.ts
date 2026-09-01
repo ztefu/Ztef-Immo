@@ -1,9 +1,16 @@
 "use server";
 
-import { createAdminClient } from '@/utils/supabase/server';
+import { createAdminClient, createClient } from '@/utils/supabase/server';
 
 export async function uploadContractAction(tenantId: string, base64Pdf: string): Promise<string | null> {
   try {
+    const supabase = createClient();
+    const { data: authCheck } = await supabase.from('tenants').select('id').eq('id', tenantId).single();
+    if (!authCheck) {
+      console.error('Unauthorized upload attempt for tenant:', tenantId);
+      return null;
+    }
+
     const adminClient = createAdminClient();
     const fileName = `${tenantId}/contrat_bail.pdf`;
     
@@ -49,6 +56,13 @@ export async function uploadContractAction(tenantId: string, base64Pdf: string):
 
 export async function uploadReceiptAction(paymentId: string, base64Pdf: string): Promise<string | null> {
   try {
+    const supabase = createClient();
+    const { data: authCheck } = await supabase.from('payments').select('id').eq('id', paymentId).single();
+    if (!authCheck) {
+      console.error('Unauthorized upload attempt for payment:', paymentId);
+      return null;
+    }
+
     const adminClient = createAdminClient();
     const fileName = `receipts/${paymentId}_quittance.pdf`;
     

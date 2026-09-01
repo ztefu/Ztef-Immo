@@ -40,7 +40,7 @@ export async function GET() {
 
     if (ownersToInsert.length > 0) {
       const { error } = await supabase.from('owners').insert(ownersToInsert);
-      if (error) throw error;
+      if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
     }
 
     // 2. PROPERTIES
@@ -65,7 +65,7 @@ export async function GET() {
 
     if (propertiesToInsert.length > 0) {
       const { error } = await supabase.from('properties').insert(propertiesToInsert);
-      if (error) throw error;
+      if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
     }
 
     // 3. TENANTS (Initial insert without unit_id to avoid circular dependency issues)
@@ -93,7 +93,7 @@ export async function GET() {
 
     if (tenantsToInsert.length > 0) {
       const { error } = await supabase.from('tenants').insert(tenantsToInsert);
-      if (error) throw error;
+      if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
     }
 
     // 4. UNITS
@@ -117,7 +117,7 @@ export async function GET() {
 
     if (unitsToInsert.length > 0) {
       const { error } = await supabase.from('units').insert(unitsToInsert);
-      if (error) throw error;
+      if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
     }
 
     // 5. UPDATE TENANTS WITH UNIT_ID
@@ -130,7 +130,7 @@ export async function GET() {
             .from('tenants')
             .update({ unit_id: unitNewId })
             .eq('id', tenantNewId);
-          if (error) throw error;
+          if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
         }
       }
     }
@@ -154,7 +154,7 @@ export async function GET() {
 
     if (paymentsToInsert.length > 0) {
       const { error } = await supabase.from('payments').insert(paymentsToInsert);
-      if (error) throw error;
+      if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
     }
 
     // 7. TICKETS
@@ -177,12 +177,15 @@ export async function GET() {
 
     if (ticketsToInsert.length > 0) {
       const { error } = await supabase.from('tickets').insert(ticketsToInsert);
-      if (error) throw error;
+      if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
     }
 
     return NextResponse.json({ success: true, message: 'Data seeded successfully!' });
   } catch (error: any) {
-    console.error('Error seeding data:', error);
-    return NextResponse.json({ success: false, error: 'Une erreur interne est survenue.' }, { status: 500 });
+    console.error('Seed error:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: "Une erreur interne est survenue lors de l'initialisation des données." 
+    }, { status: 500 });
   }
 }
