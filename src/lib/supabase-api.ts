@@ -24,8 +24,8 @@ export async function getCurrentAgency(providedUserId?: string) {
   noStore();
   let userId = providedUserId;
   
+  const supabase = createClient();
   if (!userId) {
-    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     userId = user?.id;
   }
