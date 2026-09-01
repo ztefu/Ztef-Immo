@@ -32,21 +32,19 @@ export async function getCurrentAgency(providedUserId?: string) {
   
   if (!userId) return null;
 
-  const adminClient = createAdminClient();
-
   // 1. Check if user is a tenant
-  const { data: tenant } = await adminClient.from('tenants').select('agency_id').eq('auth_id', userId).single();
+  const { data: tenant } = await supabase.from('tenants').select('agency_id').eq('auth_id', userId).single();
   let agencyId = tenant?.agency_id;
 
   // 2. If not a tenant, check if user is an agency manager
   if (!agencyId) {
-    const { data: agencyUser } = await adminClient.from('agency_users').select('agency_id').eq('user_id', userId).single();
+    const { data: agencyUser } = await supabase.from('agency_users').select('agency_id').eq('user_id', userId).single();
     agencyId = agencyUser?.agency_id;
   }
 
   // 3. If not an agency manager, check if user is an autonomous owner
   if (!agencyId) {
-    const { data: owner } = await adminClient.from('owners').select('id, full_name, email, phone, address, slug, management_type, tenant_access_code').eq('auth_id', userId).single();
+    const { data: owner } = await supabase.from('owners').select('id, full_name, email, phone, address, slug, management_type, tenant_access_code').eq('auth_id', userId).single();
     if (owner && owner.management_type === 'Autonome') {
       // Return a "virtual agency" object representing the autonomous owner's context
       return {
@@ -66,7 +64,7 @@ export async function getCurrentAgency(providedUserId?: string) {
     return null;
   }
 
-  const { data, error } = await adminClient.from('agencies').select('*').eq('id', agencyId).single();
+  const { data, error } = await supabase.from('agencies').select('*').eq('id', agencyId).single();
   if (error) { console.log('getCurrentAgency: error fetching agency', error); return null; }
 
   console.log('getCurrentAgency returning:', mapAgency(data));
@@ -79,29 +77,29 @@ export async function getCurrentAgency(providedUserId?: string) {
  * whether to scope data to an agency or an autonomous owner.
  */
 export async function getManagerContext(userId: string): Promise<{ type: 'agency'; agencyId: string } | { type: 'owner'; ownerId: string } | null> {
-  const adminClient = createAdminClient();
+  const supabase = createClient();
 
   // 1. Check agency_users
-  const { data: agencyUser } = await adminClient.from('agency_users').select('agency_id').eq('user_id', userId).single();
+  const { data: agencyUser } = await supabase.from('agency_users').select('agency_id').eq('user_id', userId).single();
   if (agencyUser?.agency_id) {
     return { type: 'agency', agencyId: agencyUser.agency_id };
   }
 
   // 2. Check owners (autonomous)
-  const { data: owner } = await adminClient.from('owners').select('id, management_type').eq('auth_id', userId).single();
+  const { data: owner } = await supabase.from('owners').select('id, management_type').eq('auth_id', userId).single();
   if (owner && owner.management_type === 'Autonome') {
     return { type: 'owner', ownerId: owner.id };
   }
 
   // 3. Check if user is a tenant — route them through their agency or owner context
-  const { data: tenant } = await adminClient.from('tenants').select('agency_id, unit_id').eq('auth_id', userId).single();
+  const { data: tenant } = await supabase.from('tenants').select('agency_id, unit_id').eq('auth_id', userId).single();
   if (tenant) {
     if (tenant.agency_id) {
       return { type: 'agency', agencyId: tenant.agency_id };
     } else if (tenant.unit_id) {
-      const { data: unit } = await adminClient.from('units').select('property_id').eq('id', tenant.unit_id).single();
+      const { data: unit } = await supabase.from('units').select('property_id').eq('id', tenant.unit_id).single();
       if (unit?.property_id) {
-        const { data: property } = await adminClient.from('properties').select('owner_id').eq('id', unit.property_id).single();
+        const { data: property } = await supabase.from('properties').select('owner_id').eq('id', unit.property_id).single();
         if (property?.owner_id) {
           return { type: 'owner', ownerId: property.owner_id };
         }
@@ -117,8 +115,8 @@ export async function getManagerContext(userId: string): Promise<{ type: 'agency
  * Used by the portal to load the current tenant's profile without going through getManagerContext.
  */
 export async function getTenantByAuthId(authId: string): Promise<Tenant | null> {
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient.from('tenants').select('*').eq('auth_id', authId).single();
+  const supabase = createClient();
+  const { data, error } = await supabase.from('tenants').select('*').eq('auth_id', authId).single();
   if (error || !data) return null;
   return mapTenant(data);
 }
@@ -126,7 +124,7 @@ export async function getTenantByAuthId(authId: string): Promise<Tenant | null> 
 import { revalidatePath } from 'next/cache';
 
 export async function updateAgency(id: string, updates: any) {
-  const adminClient = createAdminClient();
+  const supabase = createClient();
   const dbUpdates: any = {};
   if (updates.name) {
     dbUpdates.name = updates.name;
@@ -140,7 +138,7 @@ export async function updateAgency(id: string, updates: any) {
   if (updates.language) dbUpdates.language = updates.language;
   if (updates.tenantAccessCode !== undefined) dbUpdates.tenant_access_code = updates.tenantAccessCode;
 
-  const { data, error } = await adminClient.from('agencies').update(dbUpdates).eq('id', id).select().single();
+  const { data, error } = await supabase.from('agencies').update(dbUpdates).eq('id', id).select().single();
   if (error) throw error;
   
   // Mass password updates have been removed since each tenant now has a unique access code.
@@ -150,24 +148,24 @@ export async function updateAgency(id: string, updates: any) {
 }
 
 export async function getAgencyById(idOrSlug: string) {
-  const adminClient = createAdminClient();
+  const supabase = createClient();
   const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
   
   if (isUUID) {
-    const { data, error } = await adminClient.from('agencies').select('*').eq('id', idOrSlug).single();
+    const { data, error } = await supabase.from('agencies').select('*').eq('id', idOrSlug).single();
     if (error || !data) return null;
     return mapAgency(data);
   } else {
     // If it's a slug, we need to query by slug. But first the slug column must exist in the DB!
-    const { data, error } = await adminClient.from('agencies').select('*').eq('slug', idOrSlug).single();
+    const { data, error } = await supabase.from('agencies').select('*').eq('slug', idOrSlug).single();
     if (error || !data) return null;
     return mapAgency(data);
   }
 }
 
 export async function getOwnerBySlug(slug: string) {
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient.from('owners').select('*').eq('slug', slug).single();
+  const supabase = createClient();
+  const { data, error } = await supabase.from('owners').select('*').eq('slug', slug).single();
   if (error || !data) return null;
   return mapOwner(data);
 }
@@ -179,12 +177,11 @@ export async function getProperties() {
   const context = await getManagerContext(user.id);
   if (!context) {
     // Fallback for tenant with no agency_id (autonomous owner's tenant)
-    const adminClient = createAdminClient();
-    const { data: tenantRow } = await adminClient.from('tenants').select('unit_id').eq('auth_id', user.id).single();
+    const { data: tenantRow } = await supabase.from('tenants').select('unit_id').eq('auth_id', user.id).single();
     if (tenantRow?.unit_id) {
-      const { data: unitRow } = await adminClient.from('units').select('property_id').eq('id', tenantRow.unit_id).single();
+      const { data: unitRow } = await supabase.from('units').select('property_id').eq('id', tenantRow.unit_id).single();
       if (unitRow?.property_id) {
-        const { data } = await adminClient.from('properties').select('*').eq('id', unitRow.property_id);
+        const { data } = await supabase.from('properties').select('*').eq('id', unitRow.property_id);
         return (data || []).map(mapProperty);
       }
     }
@@ -424,8 +421,7 @@ export async function getTenants() {
   const context = await getManagerContext(user.id);
   if (!context) {
     // Last resort: user might be a tenant whose agency_id is NULL (autonomous owner's tenant)
-    const adminClient = createAdminClient();
-    const { data: tenantRow } = await adminClient.from('tenants').select('*').eq('auth_id', user.id).single();
+    const { data: tenantRow } = await supabase.from('tenants').select('*').eq('auth_id', user.id).single();
     if (tenantRow) return [mapTenant(tenantRow)];
     return [];
   }
@@ -458,10 +454,9 @@ export async function getUnits() {
   const context = await getManagerContext(user.id);
   if (!context) {
     // Fallback for tenant with no agency_id (autonomous owner's tenant)
-    const adminClient = createAdminClient();
-    const { data: tenantRow } = await adminClient.from('tenants').select('unit_id').eq('auth_id', user.id).single();
+    const { data: tenantRow } = await supabase.from('tenants').select('unit_id').eq('auth_id', user.id).single();
     if (tenantRow?.unit_id) {
-      const { data } = await adminClient.from('units').select('*').eq('id', tenantRow.unit_id);
+      const { data } = await supabase.from('units').select('*').eq('id', tenantRow.unit_id);
       return (data || []).map(mapUnit);
     }
     return [];
@@ -493,10 +488,9 @@ export async function getPayments() {
   const context = await getManagerContext(user.id);
   if (!context) {
     // Fallback for tenant with no agency_id (autonomous owner's tenant)
-    const adminClient = createAdminClient();
-    const { data: tenantRow } = await adminClient.from('tenants').select('id').eq('auth_id', user.id).single();
+    const { data: tenantRow } = await supabase.from('tenants').select('id').eq('auth_id', user.id).single();
     if (tenantRow?.id) {
-      const { data } = await adminClient.from('payments').select('*').eq('tenant_id', tenantRow.id).order('created_at', { ascending: false });
+      const { data } = await supabase.from('payments').select('*').eq('tenant_id', tenantRow.id).order('created_at', { ascending: false });
       return (data || []).map(mapPayment);
     }
     return [];
@@ -975,7 +969,7 @@ export async function addOwner(owner: any) {
 }
 
 export async function updateOwner(id: string, updates: any) {
-  const adminClient = createAdminClient();
+  const supabase = createClient();
   const dbUpdates: any = {};
   if (updates.fullName) dbUpdates.full_name = updates.fullName;
   if (updates.phone) dbUpdates.phone = updates.phone;
@@ -986,7 +980,7 @@ export async function updateOwner(id: string, updates: any) {
   if (updates.joinDate) dbUpdates.join_date = updates.joinDate;
   if (updates.tenantAccessCode !== undefined) dbUpdates.tenant_access_code = updates.tenantAccessCode;
 
-  const { data, error } = await adminClient.from('owners').update(dbUpdates).eq('id', id).select().single();
+  const { data, error } = await supabase.from('owners').update(dbUpdates).eq('id', id).select().single();
   if (error) throw error;
 
   // Mass password updates have been removed since each tenant now has a unique access code.
@@ -1060,18 +1054,18 @@ export async function updateTicket(id: string, updates: any) {
 }
 
 export async function deleteTicket(id: string) {
-  const adminClient = createAdminClient();
-  const { data: deleted, error } = await adminClient.from('tickets').delete().eq('id', id).select();
+  const supabase = createClient();
+  const { data: deleted, error } = await supabase.from('tickets').delete().eq('id', id).select();
   if (error) throw error;
   if (!deleted || deleted.length === 0) throw new Error("Impossible de supprimer ce ticket.");
 }
 
 export async function uploadContractPdf(tenantId: string, pdfBlob: Blob): Promise<string | null> {
-  const adminClient = createAdminClient();
+  const supabase = createClient();
   const fileName = `${tenantId}/contrat_bail.pdf`;
   
   // Upload to Supabase Storage 'documents' bucket
-  const { data, error } = await adminClient.storage
+  const { data, error } = await supabase.storage
     .from('documents')
     .upload(fileName, pdfBlob, {
       contentType: 'application/pdf',
@@ -1084,7 +1078,7 @@ export async function uploadContractPdf(tenantId: string, pdfBlob: Blob): Promis
   }
   
   // Get public URL
-  const { data: publicUrlData } = adminClient.storage
+  const { data: publicUrlData } = supabase.storage
     .from('documents')
     .getPublicUrl(fileName);
     
@@ -1092,7 +1086,7 @@ export async function uploadContractPdf(tenantId: string, pdfBlob: Blob): Promis
   const publicUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
   
   // Save URL in database
-  const { error: updateError } = await adminClient
+  const { error: updateError } = await supabase
     .from('tenants')
     .update({ contract_url: publicUrl })
     .eq('id', tenantId);
@@ -1142,8 +1136,8 @@ function mapDelegation(db: any): PropertyDelegation {
  * Search for an agency by its slug (for owners to find an agency to delegate to)
  */
 export async function searchAgencyBySlug(slug: string) {
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient
+  const supabase = createClient();
+  const { data, error } = await supabase
     .from('agencies')
     .select('id, name, slug, contact_email, contact_phone, address')
     .eq('slug', slug)
@@ -1163,13 +1157,12 @@ export async function searchAgencyBySlug(slug: string) {
  * Request delegation of a property to an agency (called by owner)
  */
 export async function requestDelegation(propertyId: string, agencySlug: string) {
-  const adminClient = createAdminClient();
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Vous devez être connecté.");
 
   // Get owner ID
-  const { data: owner } = await adminClient
+  const { data: owner } = await supabase
     .from('owners')
     .select('id')
     .eq('auth_id', user.id)
@@ -1177,7 +1170,7 @@ export async function requestDelegation(propertyId: string, agencySlug: string) 
   if (!owner) throw new Error("Vous n'êtes pas un propriétaire enregistré.");
 
   // Find the agency by slug
-  const { data: agency } = await adminClient
+  const { data: agency } = await supabase
     .from('agencies')
     .select('id, name')
     .eq('slug', agencySlug)
@@ -1185,7 +1178,7 @@ export async function requestDelegation(propertyId: string, agencySlug: string) 
   if (!agency) throw new Error("Aucune agence trouvée avec cet identifiant.");
 
   // Verify property belongs to this owner
-  const { data: property } = await adminClient
+  const { data: property } = await supabase
     .from('properties')
     .select('id, owner_id')
     .eq('id', propertyId)
@@ -1194,7 +1187,7 @@ export async function requestDelegation(propertyId: string, agencySlug: string) 
   if (!property) throw new Error("Cette propriété ne vous appartient pas.");
 
   // Check if a delegation already exists for this property+agency
-  const { data: existing } = await adminClient
+  const { data: existing } = await supabase
     .from('property_delegations')
     .select('id, status')
     .eq('property_id', propertyId)
@@ -1207,7 +1200,7 @@ export async function requestDelegation(propertyId: string, agencySlug: string) 
   }
 
   // Create the delegation request
-  const { data: delegation, error } = await adminClient
+  const { data: delegation, error } = await supabase
     .from('property_delegations')
     .insert({
       property_id: propertyId,
@@ -1226,7 +1219,6 @@ export async function requestDelegation(propertyId: string, agencySlug: string) 
  * Get all delegations visible to the current user (owner or agency)
  */
 export async function getDelegations() {
-  const adminClient = createAdminClient();
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
@@ -1234,7 +1226,7 @@ export async function getDelegations() {
   const context = await getManagerContext(user.id);
   if (!context) return [];
 
-  let query = adminClient
+  let query = supabase
     .from('property_delegations')
     .select(`
       *,
@@ -1259,8 +1251,8 @@ export async function getDelegations() {
  * Accept a delegation request (called by agency manager)
  */
 export async function acceptDelegation(delegationId: string) {
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient
+  const supabase = createClient();
+  const { data, error } = await supabase
     .from('property_delegations')
     .update({ status: 'Acceptée' })
     .eq('id', delegationId)
@@ -1276,8 +1268,8 @@ export async function acceptDelegation(delegationId: string) {
  * Reject a delegation request (called by agency manager)
  */
 export async function rejectDelegation(delegationId: string) {
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient
+  const supabase = createClient();
+  const { data, error } = await supabase
     .from('property_delegations')
     .update({ status: 'Refusée' })
     .eq('id', delegationId)
@@ -1292,8 +1284,8 @@ export async function rejectDelegation(delegationId: string) {
  * Revoke a delegation (called by owner to take back control)
  */
 export async function revokeDelegation(delegationId: string) {
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient
+  const supabase = createClient();
+  const { data, error } = await supabase
     .from('property_delegations')
     .update({ status: 'Révoquée' })
     .eq('id', delegationId)
@@ -1309,8 +1301,8 @@ export async function revokeDelegation(delegationId: string) {
  * Get the active delegation for a property (if any)
  */
 export async function getPropertyDelegation(propertyId: string): Promise<PropertyDelegation | null> {
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient
+  const supabase = createClient();
+  const { data, error } = await supabase
     .from('property_delegations')
     .select(`
       *,
@@ -1332,9 +1324,7 @@ export async function getPendingDelegationsCount(): Promise<number> {
   if (!user) return 0;
   const context = await getManagerContext(user.id);
   if (!context) return 0;
-
-  const adminClient = createAdminClient();
-  let query = adminClient
+  let query = supabase
     .from('property_delegations')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'En attente');
