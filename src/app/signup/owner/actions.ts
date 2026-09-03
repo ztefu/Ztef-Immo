@@ -12,7 +12,7 @@ function generateSlug(text: string): string {
 export async function signupOwner(formData: FormData) {
   const headersList = await headers();
   const ip = headersList.get("x-forwarded-for") || "unknown";
-  if (!signupRateLimiter.check(ip)) {
+  if (!(await signupRateLimiter.check(ip))) {
     return { error: "Trop de tentatives d'inscription. Veuillez réessayer plus tard." };
   }
 

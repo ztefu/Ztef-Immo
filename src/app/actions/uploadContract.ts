@@ -14,9 +14,14 @@ export async function uploadContractAction(tenantId: string, base64Pdf: string):
     const adminClient = createAdminClient();
     const fileName = `${tenantId}/contrat_bail.pdf`;
     
-    // base64Pdf might contain the data URL prefix, we strip it out if present
     const base64Data = base64Pdf.includes(',') ? base64Pdf.split(',')[1] : base64Pdf;
     const buffer = Buffer.from(base64Data, 'base64');
+    
+    // Magic Bytes Validation: Ensure it's actually a PDF
+    if (buffer.length < 5 || buffer.toString('utf-8', 0, 5) !== '%PDF-') {
+      console.error('Invalid file type uploaded for contract. Expected PDF magic bytes.');
+      return null;
+    }
     
     const { error } = await adminClient.storage
       .from('documents')
@@ -66,9 +71,14 @@ export async function uploadReceiptAction(paymentId: string, base64Pdf: string):
     const adminClient = createAdminClient();
     const fileName = `receipts/${paymentId}_quittance.pdf`;
     
-    // base64Pdf might contain the data URL prefix, we strip it out if present
     const base64Data = base64Pdf.includes(',') ? base64Pdf.split(',')[1] : base64Pdf;
     const buffer = Buffer.from(base64Data, 'base64');
+    
+    // Magic Bytes Validation: Ensure it's actually a PDF
+    if (buffer.length < 5 || buffer.toString('utf-8', 0, 5) !== '%PDF-') {
+      console.error('Invalid file type uploaded for receipt. Expected PDF magic bytes.');
+      return null;
+    }
     
     const { error } = await adminClient.storage
       .from('documents')

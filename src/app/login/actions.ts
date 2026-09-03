@@ -8,7 +8,7 @@ import { loginRateLimiter } from "@/lib/rate-limit";
 export async function login(formData: FormData) {
   const headersList = await headers();
   const ip = headersList.get("x-forwarded-for") || "unknown";
-  if (!loginRateLimiter.check(ip)) {
+  if (!(await loginRateLimiter.check(ip))) {
     return { error: "Trop de tentatives de connexion. Veuillez réessayer plus tard." };
   }
 
