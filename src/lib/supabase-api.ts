@@ -142,7 +142,7 @@ export async function updateAgency(id: string, updates: any) {
   if (updates.tenantAccessCode !== undefined) dbUpdates.tenant_access_code = updates.tenantAccessCode;
 
   const { data, error } = await supabase.from('agencies').update(dbUpdates).eq('id', id).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   
   // Mass password updates have been removed since each tenant now has a unique access code.
 
@@ -200,28 +200,28 @@ export async function getProperties() {
   }
 
   const { data, error } = await query;
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return (data || []).map(mapProperty);
 }
 
 export async function getProperty(id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.from('properties').select('*').eq('id', id).single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return mapProperty(data);
 }
 
 export async function getPropertyUnits(propertyId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.from('units').select('*').eq('property_id', propertyId);
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return (data || []).map(mapUnit);
 }
 
 export async function getUnitTenant(unitId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.from('tenants').select('*').eq('unit_id', unitId).single();
-  if (error && error.code !== 'PGRST116') console.error(error); throw new Error("Une erreur interne est survenue."); // Ignore not found
+  if (error && error.code !== 'PGRST116') { console.error(error); throw new Error("Une erreur interne est survenue."); } // Ignore not found
   return data ? mapTenant(data) : undefined;
 }
 
@@ -232,7 +232,7 @@ export async function getTenantPayments(tenantId: string) {
     .select('*')
     .eq('tenant_id', tenantId)
     .order('date', { ascending: false });
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return (data || []).map(mapPayment);
 }
 
@@ -257,7 +257,7 @@ export async function addPayment(payment: any) {
     receipt_url: rest.receiptUrl,
   };
   const { data, error } = await supabase.from('payments').insert([dbPayment]).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   
   // Update tenant global status
   if (rest.status === 'Payé' || rest.status === 'En retard') {
@@ -415,7 +415,7 @@ export async function getOwners() {
   }
 
   const { data, error } = await query;
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return (data || []).map(mapOwner);
 }
 
@@ -448,7 +448,7 @@ export async function getTenants() {
   }
 
   const { data, error } = await query;
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return (data || []).map(mapTenant);
 }
 
@@ -482,7 +482,7 @@ export async function getUnits() {
   }
 
   const { data, error } = await query;
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return (data || []).map(mapUnit);
 }
 
@@ -522,7 +522,7 @@ export async function getPayments() {
   }
 
   const { data, error } = await query;
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return (data || []).map(mapPayment);
 }
 
@@ -575,7 +575,7 @@ export async function getTickets() {
   }
 
   const { data, error } = await query;
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return (data || []).map(mapTicket);
 }
 
@@ -606,7 +606,7 @@ export async function addProperty(property: any) {
     agency_id: agencyId,
   };
   const { data, error } = await supabase.from('properties').insert([dbProperty]).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   
   // Force removal of agency_id if it was automatically added by a DB trigger for an autonomous owner
   if (!agencyId && data.agency_id) {
@@ -628,7 +628,7 @@ export async function deleteProperty(id: string) {
   }
   
   const { error } = await supabase.from('properties').delete().eq('id', id);
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return true;
 }
 
@@ -650,7 +650,7 @@ export async function updateProperty(id: string, updates: any) {
   if (updates.area !== undefined) dbUpdates.area = updates.area;
 
   const { data, error } = await supabase.from('properties').update(dbUpdates).eq('id', id).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
 
   // Force removal of agency_id if it was automatically added by a DB trigger for an autonomous owner
   // In update we just check if it shouldn't have one
@@ -691,7 +691,7 @@ export async function addUnit(unit: any) {
     agency_id: agencyId,
   };
   const { data, error } = await supabase.from('units').insert([dbUnit]).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   
   // Force removal of agency_id if it was automatically added by a DB trigger for an autonomous owner
   if (!agencyId && data.agency_id) {
@@ -719,7 +719,7 @@ export async function updateUnit(id: string, updates: any) {
   if (updates.description) dbUpdates.description = updates.description;
 
   const { data, error } = await supabase.from('units').update(dbUpdates).eq('id', id).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return mapUnit(data);
 }
 
@@ -733,7 +733,7 @@ export async function deleteUnit(id: string) {
   }
   
   const { data: deleted, error } = await supabase.from('units').delete().eq('id', id).select();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   if (!deleted || deleted.length === 0) throw new Error("Impossible de supprimer cette unité.");
 }
 
@@ -873,7 +873,7 @@ export async function updateTenant(id: string, updates: any) {
   const { data: oldTenant } = await supabase.from('tenants').select('unit_id').eq('id', id).single();
   
   const { data, error } = await supabase.from('tenants').update(dbUpdates).eq('id', id).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
 
   if (updates.status === 'Ancien' && oldTenant?.unit_id) {
     // Le bail est terminé, on libère le logement
@@ -906,7 +906,7 @@ export async function deleteTenant(id: string) {
   
   // 3. Delete from tenants table
   const { data: deleted, error } = await adminClient.from('tenants').delete().eq('id', id).select();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   if (!deleted || deleted.length === 0) {
     console.error("Aucun locataire n'a été supprimé (problème de droits ou ID introuvable).");
     throw new Error("Impossible de supprimer ce locataire.");
@@ -926,7 +926,7 @@ export async function deleteTenant(id: string) {
 export async function getOwnerProperties(ownerId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.from('properties').select('*').eq('owner_id', ownerId);
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return (data || []).map(mapProperty);
 }
 
@@ -978,7 +978,7 @@ export async function addOwner(owner: any) {
     agency_id: agencyId,
   };
   const { data, error } = await supabase.from('owners').insert([dbOwner]).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return mapOwner(data);
 }
 
@@ -997,7 +997,7 @@ export async function updateOwner(id: string, updates: any) {
   if (updates.tenantAccessCode !== undefined) dbUpdates.tenant_access_code = updates.tenantAccessCode;
 
   const { data, error } = await supabase.from('owners').update(dbUpdates).eq('id', id).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
 
   // Mass password updates have been removed since each tenant now has a unique access code.
 
@@ -1007,7 +1007,7 @@ export async function updateOwner(id: string, updates: any) {
 export async function deleteOwner(id: string) {
   const supabase = await createClient();
   const { data: deleted, error } = await supabase.from('owners').delete().eq('id', id).select();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   if (!deleted || deleted.length === 0) throw new Error("Impossible de supprimer ce propriétaire.");
 }
 
@@ -1036,7 +1036,7 @@ export async function addTicket(ticket: any) {
     cost: ticket.cost,
   };
   const { data, error } = await supabase.from('tickets').insert([dbTicket]).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   
   // Force removal of agency_id if it was automatically added by a DB trigger for an autonomous owner
   const { data: { user } } = await supabase.auth.getUser();
@@ -1067,14 +1067,14 @@ export async function updateTicket(id: string, updates: any) {
   if (updates.cost) dbUpdates.cost = updates.cost;
 
   const { data, error } = await supabase.from('tickets').update(dbUpdates).eq('id', id).select().single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return mapTicket(data);
 }
 
 export async function deleteTicket(id: string) {
   const supabase = await createClient();
   const { data: deleted, error } = await supabase.from('tickets').delete().eq('id', id).select();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   if (!deleted || deleted.length === 0) throw new Error("Impossible de supprimer ce ticket.");
 }
 
@@ -1228,7 +1228,7 @@ export async function requestDelegation(propertyId: string, agencySlug: string) 
     })
     .select()
     .single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
 
   return { ...mapDelegation(delegation), agencyName: agency.name };
 }
@@ -1277,7 +1277,7 @@ export async function acceptDelegation(delegationId: string) {
     .eq('status', 'En attente')
     .select()
     .single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   revalidatePath('/', 'layout');
   return mapDelegation(data);
 }
@@ -1294,7 +1294,7 @@ export async function rejectDelegation(delegationId: string) {
     .eq('status', 'En attente')
     .select()
     .single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   return mapDelegation(data);
 }
 
@@ -1310,7 +1310,7 @@ export async function revokeDelegation(delegationId: string) {
     .eq('status', 'Acceptée')
     .select()
     .single();
-  if (error) console.error(error); throw new Error("Une erreur interne est survenue.");
+  if (error) { console.error(error); throw new Error("Une erreur interne est survenue."); }
   revalidatePath('/', 'layout');
   return mapDelegation(data);
 }
