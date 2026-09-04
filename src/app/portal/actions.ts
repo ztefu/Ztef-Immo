@@ -62,7 +62,11 @@ export async function loginTenant(formData: FormData) {
       }
     }
 
-    const pseudoEmail = `${targetPhone}.${resolvedScopeId}@locataire.mazeno.com`;
+    const tenantDomain = process.env.TENANT_EMAIL_DOMAIN;
+    if (!tenantDomain) {
+      return { success: false, error: "Configuration manquante (TENANT_EMAIL_DOMAIN)" };
+    }
+    const pseudoEmail = `${targetPhone}.${resolvedScopeId}@${tenantDomain}`;
     
     const supabase = await createClient();
     const { error } = await supabase.auth.signInWithPassword({
@@ -125,7 +129,11 @@ export async function loginTenant(formData: FormData) {
       }
     }
 
-    const pseudoEmail = `${targetPhone}.${resolvedScopeId}@locataire.mazeno.com`;
+    const tenantDomain = process.env.TENANT_EMAIL_DOMAIN;
+    if (!tenantDomain) {
+      return { success: false, error: "Configuration manquante (TENANT_EMAIL_DOMAIN)" };
+    }
+    const pseudoEmail = `${targetPhone}.${resolvedScopeId}@${tenantDomain}`;
     
     const supabase = await createClient();
     const { error } = await supabase.auth.signInWithPassword({

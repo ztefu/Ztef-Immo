@@ -756,7 +756,9 @@ export async function addTenant(tenant: any) {
   const accessCode = crypto.randomUUID().slice(0, 8);
   
   const cleanPhone = tenant.phone.replace(/\s+/g, '');
-  const pseudoEmail = `${cleanPhone}.${scopeId}@locataire.mazeno.com`;
+  const tenantDomain = process.env.TENANT_EMAIL_DOMAIN;
+  if (!tenantDomain) throw new Error("Configuration manquante (TENANT_EMAIL_DOMAIN)");
+  const pseudoEmail = `${cleanPhone}.${scopeId}@${tenantDomain}`;
 
   const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
     email: pseudoEmail,

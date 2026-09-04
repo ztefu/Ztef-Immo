@@ -57,8 +57,9 @@ export async function updateSession(request: NextRequest) {
   // On suppose que l'agence se connecte via /login avec un email (et non pas une adresse factice @locataire.mazeno.com)
   // Les locataires se connectent via /portal (qui utilise @locataire.mazeno.com)
   if (user) {
-    const isTenantUser = user.email?.endsWith('@locataire.mazeno.com');
-    const isSuperAdmin = user.email === 'admin@mazeno.com';
+    const tenantDomain = process.env.TENANT_EMAIL_DOMAIN;
+    const isTenantUser = tenantDomain ? user.email?.endsWith(`@${tenantDomain}`) : false;
+    const isSuperAdmin = user.email === process.env.SUPER_ADMIN_EMAIL;
     const isAdminPath = request.nextUrl.pathname.startsWith('/admin');
     
     // Sécurité : Seul le super admin peut accéder à /admin
